@@ -1,0 +1,24 @@
+group 'lol.moep'
+version '0.1-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'application'
+
+sourceCompatibility = 1.8
+mainClassName = 'lol.moep.PgoBot'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+allprojects {
+    repositories {
+        maven { url "https://jitpack.io" }
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile 'com.github.Grover-c13:PokeGOAPI-Java:8c8c4da'
+}
