@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pokémon Go Bot - Web Interface</title>
+    <meta charset="utf-8"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://npmcdn.com/leaflet@1.0.0-rc.2/dist/leaflet.css"/>
+    <style>
+        html {
+            height: 100%;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            vertical-align: baseline;
+        }
+
+        body, #container {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .map {
+            height: 100%;
+        }
+
+        #info {
+            position: absolute;
+            z-index: 9999;
+            padding-left: 38px;
+            padding-top: 7px;
+            display: none;
+        }
+
+        @keyframes loading-animation {
+            0%    { opacity: 1; }
+            50%   { opacity: 0; }
+            100%  { opacity: 1; }
+        }
+
+        #loading {
+            position: absolute;
+            z-index: 9999;
+            right: 0;
+            top: 0;
+            padding-top: 7px;
+            display: none;
+        }
+
+        .loading-img {
+            animation: loading-animation 1.0s infinite;
+        }
+
+
+
+
+    </style>
+</head>
+<body>
+<div id="info">
+    <button id="refresh">Aktualisieren</button>
+</div>
+<div id="loading">
+    <img src="https://pokevision.com/asset/image/pokeballs/master.png" class="loading-img" />
+</div>
+<div id="mapid" class="map"></div>
+<script src="https://npmcdn.com/leaflet@1.0.0-rc.2/dist/leaflet.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script>
+    // https://leaflet-extras.github.io/leaflet-providers/preview/#filter=CartoDB.Positron
+    var mymap = L.map('mapid').setView([52.509370, 13.374196], 12);
+
+    var CartoDB_Positron =  L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.{ext}', {
+	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+	subdomains: 'abcd',
+        maxZoom: 19,
+        minZoom: 8,
+        ext: 'png'
+    }).addTo(mymap);
+
+    var playerMarker = L.marker([0, 0]).addTo(mymap);
+
+    var popup = L.popup();
+    function onMapClick(e) {
+        popup
+                .setLatLng(e.latlng)
+                .setContent("You clicked the map at " + e.latlng.lat + ", " + e.latlng.lng)
+                .openOn(mymap);
+    }
+    mymap.on('click', onMapClick);
+
+    function refreshPlayerPos(data) {
+        $.getJSON('http://localhost:9090/api/playerPosition', function (data) {
+            console.log('player pos refreshed: ' + data);
+            playerMarker.setLatLng([data.lat, data.lon]);
+            playerMarker.update();
+        });
+    }
+
+    $('#refresh').click(refreshPlayerPos);
+    setInterval(function(){refreshPlayerPos()}, 2000);
+
+    $(document).ajaxStart(function(){
+        $('#loading').show();
+    });
+
+    $(document).ajaxStop(function(){
+        $('#loading').hide();
+    });
+</script>
+</body>
+</html>
+

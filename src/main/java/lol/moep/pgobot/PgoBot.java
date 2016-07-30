@@ -5,6 +5,7 @@ import com.pokegoapi.auth.GoogleUserCredentialProvider;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 import lol.moep.pgobot.runners.ErnstGrubeParkRunner;
+import lol.moep.pgobot.runners.InteractiveRunner;
 import lol.moep.pgobot.runners.PgoBotRunner;
 import okhttp3.OkHttpClient;
 
@@ -41,7 +42,7 @@ public class PgoBot {
         try {
             PokemonGo go = new PokemonGo(provider, httpClient);
 
-            PgoBotRunner r = new ErnstGrubeParkRunner(go);
+            PgoBotRunner r = new InteractiveRunner(go);
             r.startTour();
 
             System.out.println("Zurückgelegte Strecke: " + r.getStatistics().getMetersTraveledAsString());
