@@ -44,11 +44,9 @@ public class PgoBot {
 
             PgoBotRunner r = new InteractiveRunner(go);
             r.startTour();
+            r.getStatistics().print();
 
-            System.out.println("Zurückgelegte Strecke: " + r.getStatistics().getMetersTraveledAsString());
-            System.out.println("XP: " + r.getStatistics().getXp());
-            System.out.println("Gefangene Pokemon: ");
-            r.getStatistics().printCaughtPokemon();
+
 
         } catch (LoginFailedException | RemoteServerException e) {
             System.err.println("Error: " + e.getMessage());

@@ -35,6 +35,13 @@ public class StatsCounter {
         this.caughtPokemon = new LinkedList<>();
     }
 
+    public void reset() {
+        numCandies.clear();
+        this.metersTraveled = 0;
+        this.xp = 0;
+        this.caughtPokemon.clear();
+    }
+
     public void addCandies(PokemonFamilyIdOuterClass.PokemonFamilyId familyId, int[] candies) {
         int sum = this.numCandies.get(familyId) == null ? 0 : this.numCandies.get(familyId);
 //        int sum = 0;
@@ -51,7 +58,7 @@ public class StatsCounter {
         return this.numCandies.get(familyId) == null ? 0 : this.numCandies.get(familyId);
     }
 
-    public void printNumCandies() {
+    private void printNumCandies() {
         for (PokemonFamilyIdOuterClass.PokemonFamilyId fid : this.numCandies.keySet()) {
             System.out.println(PokemonFamilyIdOuterClass.PokemonFamilyId.forNumber(fid.getNumber()) + ": " + getNumCandies(fid));
         }
@@ -83,7 +90,7 @@ public class StatsCounter {
         return this.caughtPokemon;
     }
 
-    public void printCaughtPokemon() {
+    private void printCaughtPokemon() {
         for (CatchablePokemon p : this.caughtPokemon) {
             // TODO cast to pokemon?
             System.out.println(Dictionary.getNameFromPokemonId(p.getPokemonId()));
@@ -96,5 +103,12 @@ public class StatsCounter {
         } else {
             return StatsCounter.distanceInKmFormat.format(this.metersTraveled / 1000.0d).concat("km");
         }
+    }
+
+    public void print() {
+        System.out.println("Zurückgelegte Strecke: " + this.getMetersTraveledAsString());
+        System.out.println("XP: " + this.getXp());
+        System.out.println("Gefangene Pokemon: ");
+        this.printCaughtPokemon();
     }
 }

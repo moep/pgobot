@@ -84,10 +84,11 @@
 
     var popup = L.popup();
     function onMapClick(e) {
-        popup
-                .setLatLng(e.latlng)
-                .setContent("You clicked the map at " + e.latlng.lat + ", " + e.latlng.lng)
-                .openOn(mymap);
+//        popup
+//                .setLatLng(e.latlng)
+//                .setContent("You clicked the map at " + e.latlng.lat + ", " + e.latlng.lng)
+//                .openOn(mymap);
+        $.post( "http://localhost:9090/api/moveTo/" + e.latlng.lat + "/" + e.latlng.lng);
     }
     mymap.on('click', onMapClick);
 
@@ -100,7 +101,7 @@
     }
 
     $('#refresh').click(refreshPlayerPos);
-    setInterval(function(){refreshPlayerPos()}, 2000);
+    setInterval(function(){refreshPlayerPos()}, 1000);
 
     $(document).ajaxStart(function(){
         $('#loading').show();

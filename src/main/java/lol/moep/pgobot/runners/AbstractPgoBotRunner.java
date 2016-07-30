@@ -126,13 +126,14 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
 
             ++coordinatesVisited;
             sleep(sleepMillisPer10Meters);
+
+            if (coordinatesVisited % (this.moveActionDistance / 10) == 0) {
+                onMove();
+            }
         }
 
         this.sc.addMetersTraveled(distance);
 
-        if (this.sc.getMetersTraveled() % this.moveActionDistance == 0) {
-            onMove();
-        }
     }
 
     protected void onMove() throws LoginFailedException, RemoteServerException {
