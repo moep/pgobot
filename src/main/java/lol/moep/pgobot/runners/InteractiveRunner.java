@@ -64,7 +64,7 @@ public class InteractiveRunner extends AbstractPgoBotRunner {
                 System.err.println(e.getMessage());
             } finally {
                 this.sc.print();
-                System.out.println("Eier km: " + this.go.getInventories().getIncubators().get(0).getKmWalked());
+                printEggStatus();
                 continue;
             }
         }

@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by moep on 28.07.16.
@@ -91,9 +93,16 @@ public class StatsCounter {
     }
 
     private void printCaughtPokemon() {
-        for (CatchablePokemon p : this.caughtPokemon) {
+        // Map<ItemIdOuterClass.ItemId, Long> collect = lootResult.getItemsAwarded().stream()
+        // .collect(Collectors.groupingBy(ItemAwardOuterClass.ItemAward::getItemId, Collectors.counting()));
+
+        Map<String, Long> names = this.caughtPokemon.stream()
+                .map(p -> Dictionary.getNameFromPokemonId(p.getPokemonId()))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        for (String name : names.keySet()) {
             // TODO cast to pokemon?
-            System.out.println(Dictionary.getNameFromPokemonId(p.getPokemonId()));
+            System.out.println(name + " (" + names.get(name) + ")");
         }
     }
 
@@ -109,6 +118,6 @@ public class StatsCounter {
         System.out.println("Zurückgelegte Strecke: " + this.getMetersTraveledAsString());
         System.out.println("XP: " + this.getXp());
         System.out.println("Gefangene Pokemon: ");
-        this.printCaughtPokemon();
+        printCaughtPokemon();
     }
 }

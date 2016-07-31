@@ -11,6 +11,7 @@ import com.pokegoapi.api.map.fort.PokestopLootResult;
 import com.pokegoapi.api.map.pokemon.CatchResult;
 import com.pokegoapi.api.map.pokemon.CatchablePokemon;
 import com.pokegoapi.api.map.pokemon.EncounterResult;
+import com.pokegoapi.api.pokemon.EggPokemon;
 import com.pokegoapi.api.pokemon.Pokemon;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
@@ -20,7 +21,6 @@ import lol.moep.pgobot.model.Haversine;
 import lol.moep.pgobot.model.StatsCounter;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,7 +37,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     private final int moveActionDistance;
 
     protected enum SpeedWaitTime {
-        WALK(3000),
+        WALK(2400),
         DRIVE(500);
 
         private final int val;
@@ -115,7 +115,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         moveTo(targetPosition, sleepMillis);
     }
 
-    protected void moveTo(GeoCoordinate targetPosition, int sleepMillisPer10Meters) throws LoginFailedException, RemoteServerException {
+    protected void moveTo(GeoCoordinate targetPosition, int sleepMillisPer10Meters) {
         GeoCoordinate currentPosition = new GeoCoordinate(this.go.getLatitude(), this.go.getLongitude());
         double distance = Haversine.getDistanceInMeters(currentPosition, targetPosition);
         System.out.println("=== Strecke: " + currentPosition + " -> " + targetPosition + " -- " + (int) distance + "m @ 10m / " + sleepMillisPer10Meters + "ms");
@@ -125,13 +125,18 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         int coordinatesVisited = 0;
 
         for (GeoCoordinate c : interpolatedCoordinates) {
+
             this.go.setLocation(c.getLat(), c.getLon(), 0);
 
             ++coordinatesVisited;
             sleep(sleepMillisPer10Meters);
 
             if (coordinatesVisited % (this.moveActionDistance / 10) == 0) {
-                onMove();
+                try {
+                    onMove();
+                } catch (LoginFailedException | RemoteServerException e) {
+                    System.err.println(e.getMessage());
+                }
             }
         }
 
@@ -153,37 +158,41 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         return sum;
     }
 
-    protected void findAndCatchPokemon() throws LoginFailedException, RemoteServerException {
-//        System.out.println("Suche Pokémon");
-        List<CatchablePokemon> pokemons = this.go.getMap().getCatchablePokemon();
-//        System.out.println("Pokemon in der Nähe: " + pokemons.size());
+    protected void findAndCatchPokemon() {
+        List<CatchablePokemon> pokemons = null;
+        try {
+            pokemons = this.go.getMap().getCatchablePokemon();
+        } catch (LoginFailedException | RemoteServerException e) {
+            System.err.println("Serverfehler: Pokémon in der Nähe konnten nicht ermittelt werden.");
+            return;
+        }
 
         // TODO stardust stats
         int xp = 0;
 
         for (CatchablePokemon p : pokemons) {
-            EncounterResult er = p.encounterPokemon();
-//            System.out.println("Fange " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + " CP: " + er.getWildPokemon().getPokemonData().getCp());
+            try {
+                EncounterResult er = p.encounterPokemon();
 
-            if (er.wasSuccessful()) {
-                CatchResult res = p.catchPokemon();
-                xp = AbstractPgoBotRunner.listSum(res.getXpList());
-                this.sc.addXp(xp);
-                this.sc.addCaughtPokemon(p);
-//                System.out.println("Fangstatus: " + res.getStatus().name() + " ## XP: " + xp + " ## SD: " + listSum(res.getStardustList()));
-//                if(er.getStatus().equals(EncounterResponseOuterClass.EncounterResponse.Status.ENCOUNTER_SUCCESS)
-                switch (er.getStatus()) {
-                    case ENCOUNTER_SUCCESS:
-                        System.out.println("Gefangen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + " (CP: " + er.getWildPokemon().getPokemonData().getCp() + ") ## XP: " +
-                        xp + " SD: " + listSum(res.getStardustList()));
-                        break;
-                    case ENCOUNTER_POKEMON_FLED:
-                        System.out.println("Entkommen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + " (CP: " + er.getWildPokemon().getPokemonData().getCp() + ")");
-                        break;
-                    default:
+                if (er.wasSuccessful()) {
+                    CatchResult res = p.catchPokemon();
+                    xp = AbstractPgoBotRunner.listSum(res.getXpList());
+                    this.sc.addXp(xp);
+                    this.sc.addCaughtPokemon(p);
+                    switch (er.getStatus()) {
+                        case ENCOUNTER_SUCCESS:
+                            System.out.println("Gefangen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + " (CP: " + er.getWildPokemon().getPokemonData().getCp() + ") ## XP: " +
+                                    xp + " SD: " + listSum(res.getStardustList()));
+                            break;
+                        case ENCOUNTER_POKEMON_FLED:
+                            System.out.println("Entkommen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + " (CP: " + er.getWildPokemon().getPokemonData().getCp() + ")");
+                            break;
+                        default:
+                    }
                 }
+            } catch (LoginFailedException | RemoteServerException e) {
+                System.err.println("Serverfehler beim Fangen von " + p.getPokemonId().name());
             }
-
 
             // TODO more realistic value?
             sleep(1000);
@@ -199,6 +208,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         GeoCoordinate playerPosition = new GeoCoordinate(this.go.getLatitude(), this.go.getLongitude());
         Collection<Pokestop> pokestops = this.go.getMap().getMapObjects().getPokestops();
 
+        List<Pokestop> sortedPokestops = getSortedPokestops(playerPosition, pokestops, radius);
         int xp = 0;
 
         // TODO use this subset for the loop
@@ -208,36 +218,67 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
 
         int numLooted = 0;
         GeoCoordinate wp = null;
-        for (Pokestop ps : pokestops) {
+        for (Pokestop ps : sortedPokestops) {
             wp = new GeoCoordinate(ps.getLatitude(), ps.getLongitude());
-            if (Haversine.getDistanceInMeters(playerPosition, wp) <= radius) {
-                if (ps.canLoot(true)) {
-                    moveTo(wp);
-                    ++numLooted;
-                    PokestopLootResult lootResult = ps.loot();
-                    xp = lootResult.getExperience();
-                    System.out.println("Loote (" + numLooted + "/" + numPokestops + "): " + ps.getDetails().getName()
-                            + " ## " + lootResult.getResult().name() + " ## " + xp + "EXP");
+            if (ps.canLoot(true)) {
+                moveTo(wp);
+                ++numLooted;
+                PokestopLootResult lootResult = ps.loot();
+                xp = lootResult.getExperience();
+                System.out.println("Loote (" + numLooted + "/" + numPokestops + "): " + ps.getDetails().getName()
+                        + " ## " + lootResult.getResult().name() + " ## " + xp + "EXP");
 
-                    this.sc.addXp(xp);
+                this.sc.addXp(xp);
 //
 //                    for (ItemAwardOuterClass.ItemAward ia : lootResult.getItemsAwarded()) {
 //                        System.out.println("  " + ia.getItemId().name() + "(" + ia.getItemCount() + ")");
 //                    }
 
-                    Map<ItemIdOuterClass.ItemId, Long> collect = lootResult.getItemsAwarded().stream()
-                            .collect(Collectors.groupingBy(ItemAwardOuterClass.ItemAward::getItemId, Collectors.counting()));
+                Map<ItemIdOuterClass.ItemId, Long> collect = lootResult.getItemsAwarded().stream()
+                        .collect(Collectors.groupingBy(ItemAwardOuterClass.ItemAward::getItemId, Collectors.counting()));
 
-                    for(ItemIdOuterClass.ItemId id : collect.keySet()) {
-                        System.out.println("  " + id.name() + " (" + collect.get(id) + ")");
-                    }
-
-                } else {
-                    System.out.println("Ignoriere: " + ps.getDetails().getName());
+                for (ItemIdOuterClass.ItemId id : collect.keySet()) {
+                    System.out.println("  " + id.name() + " (" + collect.get(id) + ")");
                 }
 
+            } else {
+                System.out.println("Ignoriere: " + ps.getDetails().getName());
             }
         }
+    }
+
+    private List<Pokestop> getSortedPokestops(GeoCoordinate playerPosition, Collection<Pokestop> pokestops, int radius) {
+        List<Pokestop> stopsInRange = pokestops.stream()
+                .filter(p -> Haversine.getDistanceInMeters(playerPosition, new GeoCoordinate(p.getLatitude(), p.getLongitude())) <= radius)
+                .collect(Collectors.toList());
+
+        List<Pokestop> sorted = new ArrayList<>(stopsInRange.size());
+
+        GeoCoordinate position = playerPosition;
+        GeoCoordinate position2;
+        Pokestop minStop;
+        double minDistance = Double.MAX_VALUE;
+        double distance;
+        for (Pokestop start : stopsInRange) {
+            minStop = start;
+
+            for (Pokestop dest : stopsInRange) {
+                if (sorted.contains(dest) || start.equals(dest)) {
+                    continue;
+                }
+
+                position2 = new GeoCoordinate(dest.getLatitude(), dest.getLongitude());
+                distance = Haversine.getDistanceInMeters(position, position2);
+                if (distance < minDistance) {
+                    minStop = dest;
+                    minDistance = distance;
+                }
+            }
+
+            sorted.add(minStop);
+        }
+
+        return sorted;
     }
 
     protected void tradeInTrashMobs() {
@@ -282,6 +323,16 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         }
 
         return false;
+    }
+
+    protected void printEggStatus() {
+        Set<EggPokemon> eggs = this.go.getInventories().getHatchery().getEggs();
+        System.out.println("Eier");
+        for (EggPokemon e : eggs) {
+            if (e.isIncubate()) {
+                System.out.println(e.getEggKmWalked() + "/" + e.getEggKmWalkedTarget());
+            }
+        }
     }
 
 }
