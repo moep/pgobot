@@ -23,4 +23,5 @@ dependencies {
     compile 'com.github.Grover-c13:PokeGOAPI-Java:8c8c4da'
     compile "com.sparkjava:spark-core:2.5"
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.21'
+    compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
 }

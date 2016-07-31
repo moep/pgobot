@@ -35,9 +35,15 @@
         }
 
         @keyframes loading-animation {
-            0%    { opacity: 1; }
-            50%   { opacity: 0; }
-            100%  { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
         }
 
         #loading {
@@ -54,8 +60,6 @@
         }
 
 
-
-
     </style>
 </head>
 <body>
@@ -63,7 +67,7 @@
     <button id="refresh">Aktualisieren</button>
 </div>
 <div id="loading">
-    <img src="https://pokevision.com/asset/image/pokeballs/master.png" class="loading-img" />
+    <img src="https://pokevision.com/asset/image/pokeballs/master.png" class="loading-img"/>
 </div>
 <div id="mapid" class="map"></div>
 <script src="https://npmcdn.com/leaflet@1.0.0-rc.2/dist/leaflet.js"></script>
@@ -72,15 +76,26 @@
     // https://leaflet-extras.github.io/leaflet-providers/preview/#filter=CartoDB.Positron
     var mymap = L.map('mapid').setView([52.509370, 13.374196], 12);
 
-    var CartoDB_Positron =  L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.{ext}', {
-	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-	subdomains: 'abcd',
+    var CartoDB_Positron = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.{ext}', {
+        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        subdomains: 'abcd',
         maxZoom: 19,
         minZoom: 8,
         ext: 'png'
     }).addTo(mymap);
 
     var playerMarker = L.marker([0, 0]).addTo(mymap);
+    var caughtPokemonMarkers = [];
+
+    var pokeIcon = [];
+    for (var i = 0; i <= 150; i++) {
+        pokeIcon[i] = L.Icon.Default.extend({
+            options: {
+                iconUrl: 'http://files.pokefans.net/sprites/icons/' + i + '.png'
+            }
+        });
+    }
+
 
     var popup = L.popup();
     function onMapClick(e) {
@@ -88,11 +103,11 @@
 //                .setLatLng(e.latlng)
 //                .setContent("You clicked the map at " + e.latlng.lat + ", " + e.latlng.lng)
 //                .openOn(mymap);
-        $.post( "http://localhost:9090/api/moveTo/" + e.latlng.lat + "/" + e.latlng.lng);
+        $.post("http://localhost:9090/api/moveTo/" + e.latlng.lat + "/" + e.latlng.lng);
     }
     mymap.on('click', onMapClick);
 
-    function refreshPlayerPos(data) {
+    function refreshPlayerPos() {
         $.getJSON('http://localhost:9090/api/playerPosition', function (data) {
             console.log('player pos refreshed: ' + data);
             playerMarker.setLatLng([data.lat, data.lon]);
@@ -100,16 +115,33 @@
         });
     }
 
-    $('#refresh').click(refreshPlayerPos);
-    setInterval(function(){refreshPlayerPos()}, 1000);
+    function refreshCaughtPokemonMarkers() {
+        $.getJSON('http://localhost:9090/api/caughtPokemon', function (result) {
+            // TODO remove markers
 
-    $(document).ajaxStart(function(){
+            for (var i = 0; i < result.length; i++) {
+//              caughtPokemonMarkers.push(L.marker([result[i].lat, result[i].lon]));
+                L.marker([result[i].lat, result[i].lon], {icon: new pokeIcon[result[i].number]()}).addTo(mymap);
+            }
+
+        });
+
+//        markers.addLayers(caughtPokemonMarkers);
+    }
+
+    $('#refresh').click(refreshPlayerPos);
+    setInterval(function () {
+        refreshPlayerPos()
+    }, 1000);
+
+    $(document).ajaxStart(function () {
         $('#loading').show();
     });
 
-    $(document).ajaxStop(function(){
+    $(document).ajaxStop(function () {
         $('#loading').hide();
     });
+
 </script>
 </body>
 </html>

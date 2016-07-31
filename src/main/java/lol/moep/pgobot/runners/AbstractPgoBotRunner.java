@@ -2,6 +2,7 @@ package lol.moep.pgobot.runners;
 
 import POGOProtos.Enums.PokemonIdOuterClass;
 import POGOProtos.Inventory.Item.ItemAwardOuterClass;
+import POGOProtos.Inventory.Item.ItemIdOuterClass;
 import POGOProtos.Networking.Responses.ReleasePokemonResponseOuterClass;
 import com.pokegoapi.api.PokemonGo;
 import com.pokegoapi.api.inventory.EggIncubator;
@@ -19,6 +20,8 @@ import lol.moep.pgobot.model.Haversine;
 import lol.moep.pgobot.model.StatsCounter;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -34,7 +37,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     private final int moveActionDistance;
 
     protected enum SpeedWaitTime {
-        WALK(3600),
+        WALK(3000),
         DRIVE(500);
 
         private final int val;
@@ -160,15 +163,27 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
 
         for (CatchablePokemon p : pokemons) {
             EncounterResult er = p.encounterPokemon();
-            System.out.println("Fange " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + " CP: " + er.getWildPokemon().getPokemonData().getCp());
+//            System.out.println("Fange " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + " CP: " + er.getWildPokemon().getPokemonData().getCp());
 
             if (er.wasSuccessful()) {
                 CatchResult res = p.catchPokemon();
                 xp = AbstractPgoBotRunner.listSum(res.getXpList());
                 this.sc.addXp(xp);
-                System.out.println("Fangstatus: " + res.getStatus().name() + " ## XP: " + xp + " ## SD: " + listSum(res.getStardustList()));
                 this.sc.addCaughtPokemon(p);
+//                System.out.println("Fangstatus: " + res.getStatus().name() + " ## XP: " + xp + " ## SD: " + listSum(res.getStardustList()));
+//                if(er.getStatus().equals(EncounterResponseOuterClass.EncounterResponse.Status.ENCOUNTER_SUCCESS)
+                switch (er.getStatus()) {
+                    case ENCOUNTER_SUCCESS:
+                        System.out.println("Gefangen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + " (CP: " + er.getWildPokemon().getPokemonData().getCp() + ") ## XP: " +
+                        xp + " SD: " + listSum(res.getStardustList()));
+                        break;
+                    case ENCOUNTER_POKEMON_FLED:
+                        System.out.println("Entkommen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + " (CP: " + er.getWildPokemon().getPokemonData().getCp() + ")");
+                        break;
+                    default:
+                }
             }
+
 
             // TODO more realistic value?
             sleep(1000);
@@ -183,14 +198,12 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     protected void lootAllPokestopsWithinRadius(int radius) throws LoginFailedException, RemoteServerException {
         GeoCoordinate playerPosition = new GeoCoordinate(this.go.getLatitude(), this.go.getLongitude());
         Collection<Pokestop> pokestops = this.go.getMap().getMapObjects().getPokestops();
-        List<GeoCoordinate> waypoints = new LinkedList<>();
 
         int xp = 0;
 
         // TODO use this subset for the loop
         long numPokestops = pokestops.stream()
                 .filter(p -> Haversine.getDistanceInMeters(playerPosition, new GeoCoordinate(p.getLatitude(), p.getLongitude())) <= radius)
-                //.filter(p -> p.canLoot())
                 .count();
 
         int numLooted = 0;
@@ -201,16 +214,24 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                 if (ps.canLoot(true)) {
                     moveTo(wp);
                     ++numLooted;
-                    System.out.println("Loote (" + numLooted + "/" + numPokestops + "): " + ps.getDetails().getName());
                     PokestopLootResult lootResult = ps.loot();
                     xp = lootResult.getExperience();
-                    System.out.println(lootResult.getResult().name() + " ## " + xp + "EXP");
+                    System.out.println("Loote (" + numLooted + "/" + numPokestops + "): " + ps.getDetails().getName()
+                            + " ## " + lootResult.getResult().name() + " ## " + xp + "EXP");
 
                     this.sc.addXp(xp);
+//
+//                    for (ItemAwardOuterClass.ItemAward ia : lootResult.getItemsAwarded()) {
+//                        System.out.println("  " + ia.getItemId().name() + "(" + ia.getItemCount() + ")");
+//                    }
 
-                    for (ItemAwardOuterClass.ItemAward ia : lootResult.getItemsAwarded()) {
-                        System.out.println("  " + ia.getItemId().name() + "(" + ia.getItemCount() + ")");
+                    Map<ItemIdOuterClass.ItemId, Long> collect = lootResult.getItemsAwarded().stream()
+                            .collect(Collectors.groupingBy(ItemAwardOuterClass.ItemAward::getItemId, Collectors.counting()));
+
+                    for(ItemIdOuterClass.ItemId id : collect.keySet()) {
+                        System.out.println("  " + id.name() + " (" + collect.get(id) + ")");
                     }
+
                 } else {
                     System.out.println("Ignoriere: " + ps.getDetails().getName());
                 }
