@@ -5,6 +5,8 @@ import com.pokegoapi.api.map.pokemon.CatchablePokemon;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 import lol.moep.pgobot.model.GeoCoordinate;
+import lol.moep.pgobot.util.Actions;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -34,7 +36,7 @@ public class InteractiveRunner extends AbstractPgoBotRunner {
 
         System.out.println("=== WebRunner ===");
         this.go.setLocation(c1.getLat(), c1.getLon(), 0);
-        tradeInTrashMobs();
+        Actions.tradeInTrashMobs(go, sc);
 
 
         String task;
