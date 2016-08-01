@@ -4,7 +4,6 @@ import com.pokegoapi.api.PokemonGo;
 import com.pokegoapi.auth.GoogleUserCredentialProvider;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
-import lol.moep.pgobot.runners.ErnstGrubeParkRunner;
 import lol.moep.pgobot.runners.InteractiveRunner;
 import lol.moep.pgobot.runners.PgoBotRunner;
 import okhttp3.OkHttpClient;
@@ -45,7 +44,6 @@ public class PgoBot {
             PgoBotRunner r = new InteractiveRunner(go);
             r.startTour();
             r.getStatistics().print();
-
 
 
         } catch (LoginFailedException | RemoteServerException e) {

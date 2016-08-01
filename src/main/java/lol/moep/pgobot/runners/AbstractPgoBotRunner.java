@@ -283,35 +283,82 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
 
     protected void tradeInTrashMobs() {
         System.out.println("Verschicke Trashmobs");
-        final List<PokemonIdOuterClass.PokemonId> banTypes = Arrays.asList(PokemonIdOuterClass.PokemonId.WEEDLE,
+        final List<PokemonIdOuterClass.PokemonId> removeAllTypes = Arrays.asList(
+                PokemonIdOuterClass.PokemonId.WEEDLE,
                 PokemonIdOuterClass.PokemonId.PIDGEY,
                 PokemonIdOuterClass.PokemonId.RATTATA,
                 PokemonIdOuterClass.PokemonId.SPEAROW,
                 PokemonIdOuterClass.PokemonId.ZUBAT,
                 PokemonIdOuterClass.PokemonId.DROWZEE,
                 PokemonIdOuterClass.PokemonId.DIGLETT,
-                PokemonIdOuterClass.PokemonId.CATERPIE);
+                PokemonIdOuterClass.PokemonId.CATERPIE,
+                PokemonIdOuterClass.PokemonId.JYNX,
+                PokemonIdOuterClass.PokemonId.EEVEE
+        );
+
+        final List<PokemonIdOuterClass.PokemonId> removeDuplicateTypes = Arrays.asList(
+                PokemonIdOuterClass.PokemonId.PIDGEOTTO,
+                PokemonIdOuterClass.PokemonId.NIDORAN_FEMALE,
+                PokemonIdOuterClass.PokemonId.NIDORAN_MALE,
+                PokemonIdOuterClass.PokemonId.ODDISH,
+                PokemonIdOuterClass.PokemonId.PARAS,
+                PokemonIdOuterClass.PokemonId.VENONAT,
+                PokemonIdOuterClass.PokemonId.POLIWAG,
+                PokemonIdOuterClass.PokemonId.SEEL,
+                PokemonIdOuterClass.PokemonId.SHELLDER,
+                PokemonIdOuterClass.PokemonId.GASTLY,
+                PokemonIdOuterClass.PokemonId.KRABBY,
+                PokemonIdOuterClass.PokemonId.HORSEA,
+                PokemonIdOuterClass.PokemonId.STARYU,
+                PokemonIdOuterClass.PokemonId.GOLDEEN,
+                PokemonIdOuterClass.PokemonId.SCYTHER,
+                PokemonIdOuterClass.PokemonId.MAGIKARP
+        );
 
         List<Pokemon> pokemons = this.go.getInventories().getPokebank().getPokemons();
-        Stream<Pokemon> pokemonStream = pokemons.stream();
 
-        Stream<Pokemon> filtered = pokemonStream.filter(p -> banTypes.contains(p.getPokemonId()))
+        Stream<Pokemon> filtered = pokemons.stream()
+                .filter(p -> removeAllTypes.contains(p.getPokemonId()))
                 .filter(p -> !p.isFavorite());
 
 
         // TODO exception handling
-        // TODO candy statistics
         filtered.forEach(p -> {
                     System.out.println(Dictionary.getNameFromPokemonId(p.getPokemonId()) + " - " + p.getCp());
                     try {
                         ReleasePokemonResponseOuterClass.ReleasePokemonResponse.Result result = p.transferPokemon();
                         System.out.println(result.getValueDescriptor());
-                        sleep(100);
+                        sleep(500);
                     } catch (LoginFailedException | RemoteServerException e) {
                         System.err.println("Fehler: " + e.getMessage());
                     }
                 }
         );
+
+        Map<PokemonIdOuterClass.PokemonId, List<Pokemon>> filtered2 = pokemons.stream()
+                .filter(p -> removeDuplicateTypes.contains(p.getPokemonId()))
+                .filter(p -> !p.isFavorite())
+                .collect(Collectors.groupingBy(Pokemon::getPokemonId));
+        
+        // TODO exception handling
+        for(PokemonIdOuterClass.PokemonId id : filtered2.keySet()) {
+            System.out.println("ID: " + Dictionary.getNameFromPokemonId(id));
+            filtered2.get(id).stream()
+                    .sorted(Comparator.comparing(Pokemon::getCp).reversed())
+                    .skip(1)
+                    .forEach(p -> {
+                        System.out.println("  " + p.getCp());
+                        try {
+                            p.transferPokemon();
+                        } catch (LoginFailedException | RemoteServerException e) {
+                            System.err.println("Fehler: " + e.getMessage());
+                        }
+                        sleep(500);
+                    });
+
+        }
+
+
     }
 
     private boolean isBreeding() {

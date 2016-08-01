@@ -30,7 +30,6 @@ public class InteractiveRunner extends AbstractPgoBotRunner {
     public void startTour() throws LoginFailedException, RemoteServerException {
         // Potsdamer Platz
         GeoCoordinate c1 = new GeoCoordinate(52.509370, 13.374196);
-        c1 = new GeoCoordinate(52.450632, 13.562791);
 
         System.out.println("=== WebRunner ===");
         this.go.setLocation(c1.getLat(), c1.getLon(), 0);
