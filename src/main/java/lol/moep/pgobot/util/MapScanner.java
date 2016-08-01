@@ -1,5 +1,6 @@
 package lol.moep.pgobot.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class MapScanner {
 		final List<CatchablePokemon> catchablePokemon;
 		synchronized (LOCK) {
 			sleepIfNeeded();
-			catchablePokemon = go.getMap().getCatchablePokemon();
+			catchablePokemon = new ArrayList<>(go.getMap().getCatchablePokemon());
 			lastMapScan = System.currentTimeMillis();
 		}
 		return catchablePokemon;
