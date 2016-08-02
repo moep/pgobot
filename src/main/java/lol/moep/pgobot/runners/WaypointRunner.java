@@ -37,16 +37,14 @@ public class WaypointRunner extends AbstractPgoBotRunner {
 			this.sc.logMessage(String.format("Gehe zu Wegpunkt %d von %d", i, waypoints.size()));
 			lootAllPokestopsWithinRadius(50);
 			moveTo(waypoints.get(i));
-			Actions.tradeInTrashMobs(go, sc);
-			Actions.tradeInWeaklings(go, sc);
+			Actions.tradeInDuplicates(go, sc);
 			Actions.tradeInTrashItems(go, sc);
 		}
 		lootAllPokestopsWithinRadius(50);
 
 		moveTo(waypoints.get(0));
 		lootAllPokestopsWithinRadius(50);
-		Actions.tradeInTrashMobs(go, sc);
-		Actions.tradeInWeaklings(go, sc);
+		Actions.tradeInDuplicates(go, sc);
 		Actions.tradeInTrashItems(go, sc);
 
 		this.sc.logMessage(String.format("=== / %s (looting) ===", runnerName));
