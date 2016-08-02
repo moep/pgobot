@@ -17,6 +17,7 @@ import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 
 import POGOProtos.Enums.PokemonIdOuterClass;
+import POGOProtos.Enums.PokemonIdOuterClass.PokemonId;
 import POGOProtos.Inventory.Item.ItemIdOuterClass.ItemId;
 import POGOProtos.Networking.Responses.AttackGymResponseOuterClass.AttackGymResponse;
 import POGOProtos.Networking.Responses.RecycleInventoryItemResponseOuterClass.RecycleInventoryItemResponse;
@@ -73,6 +74,30 @@ public class Actions {
 		tradeInMobs(go, p -> minCp.keySet().contains(p.getPokemonId()) && minCp.get(p.getPokemonId()) > p.getCp(), statistics);
 	}
 
+	public static void tradeInDuplicates(final PokemonGo go, final StatsCounter sc) {
+		final List<Pokemon> pokemons;
+		try {
+			pokemons= go.getInventories().getPokebank().getPokemons();
+		} catch (LoginFailedException | RemoteServerException e) {
+			sc.logError(e);
+			return;
+		}
+		
+		final Map<PokemonId, Integer> maxCp = new HashMap<>();
+		for (Pokemon p: pokemons) {
+			if (!maxCp.containsKey(p.getPokemonId())) {
+				maxCp.put(p.getPokemonId(), p.getCp());
+			} else {
+				if (maxCp.get(p.getPokemonId()) < p.getCp()) {
+					maxCp.put(p.getPokemonId(), p.getCp());
+				}
+			}
+		}
+		
+		// behalte alle Duplikate mit mind. 90% cp vom besten Pokemon derselben Art
+		tradeInMobs(go, p -> p.getCp() < maxCp.get(p.getPokemonId()) * 0.9, sc);
+	}
+	
 	public static void tradeInMobs(final PokemonGo go, Predicate<? super Pokemon> predicate, final StatsCounter statistics) {
 		final List<Pokemon> pokemons;
 		try {
