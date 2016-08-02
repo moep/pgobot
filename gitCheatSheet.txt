@@ -1,0 +1,13 @@
+# initial
+git remote add upstream https://github.com/moep/pgobot.git
+
+#vor jeder Änderung
+git checkout master
+git pull upstream master && git push origin master
+git checkout -b feature/name
+
+#nach jeder Änderung
+git push -u origin feature/name
+
+#auf der github Seite
+Compare & pull request

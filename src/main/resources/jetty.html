@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Pokemon Go Bot</title>
+		<script src='https://maps.googleapis.com/maps/api/js?key=AIzaSyAlpO8xtt-kyXTd9lBZQWjtOBYctrw7ihc'></script>
+		<script>
+		
+			var req;
+			var errCounter = 0;
+			var interval;
+			var map;
+			var marker;
+			
+			function initPolling() {
+				requestNewData();
+				interval = setInterval(requestNewData, 5000);
+			}
+			
+			function requestNewData() {
+				if (typeof XMLHttpRequest != "undefined") {
+					req = new XMLHttpRequest();
+				} else {
+					req = new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				req.open("GET", "http://localhost:8080/RunnerData", true);
+				req.onreadystatechange = callback;
+				req.send(null);
+			}
+			
+			function callback() {
+				if (req.readyState == 4 && req.status == 200) {
+					errCounter = 0;
+					
+					var currentPos = req.responseXML.getElementsByTagName("currentposition")[0];
+					document.getElementById("currentPos").innerHTML = currentPos.childNodes[0].nodeValue;
+					
+					var metersTraveled = req.responseXML.getElementsByTagName("meterstravelled")[0];
+					document.getElementById("metersTravelled").innerHTML = metersTraveled.childNodes[0].nodeValue;
+					
+					var xp = req.responseXML.getElementsByTagName("xp")[0];
+					document.getElementById("xp").innerHTML = xp.childNodes[0].nodeValue;
+
+					var errors = req.responseXML.getElementsByTagName("errors")[0];
+					document.getElementById("errors").innerHTML = errors.childNodes[0].nodeValue;
+
+					var message = "";
+					var messages = req.responseXML.getElementsByTagName("message");
+					for (var i = 0; i< messages.length; i++) {
+						message += messages[i].childNodes[0].nodeValue;
+					} 
+					document.getElementById("messages").innerHTML = message;
+					
+					
+					var lat = req.responseXML.getElementsByTagName("lat")[0].childNodes[0].nodeValue;
+					var lon = req.responseXML.getElementsByTagName("lon")[0].childNodes[0].nodeValue;
+					
+					if (marker != null) {
+						marker.setMap(null);
+					}
+					marker = new google.maps.Marker({map: map,position: new google.maps.LatLng(lat, lon)});
+					infowindow = new google.maps.InfoWindow({content:'<strong>Pokemon Go Bot</strong><br>current location<br>'});
+					google.maps.event.addListener(marker, 'click', function(){infowindow.open(map,marker);});
+					infowindow.open(map,marker);
+				} else {
+					errCounter = errCounter + 1;
+					if (errCounter >= 3) {
+						clearInterval(interval);
+						document.getElementById("status").innerHTML = "Run beendet!";
+						document.getElementById("status").style.fontWeight = 'bold';
+					}
+				}
+			}
+			function init_map(){
+				var myOptions = {zoom:14,
+					center:new google.maps.LatLng(52.508503, 13.369771),
+					mapTypeId: google.maps.MapTypeId.ROADMAP
+				};
+				map = new google.maps.Map(document.getElementById('gmap_canvas'), myOptions);
+				marker = new google.maps.Marker({map: map,position: new google.maps.LatLng(52.505824, 13.368248)});
+				infowindow = new google.maps.InfoWindow({content:'<strong>Pokemon Go Bot</strong><br>current location<br>'});
+				google.maps.event.addListener(marker, 'click', function(){infowindow.open(map,marker);});
+				infowindow.open(map,marker);
+				map.panTo(marker.getPosition());
+			}
+		
+			google.maps.event.addDomListener(window, 'load', init_map);
+			
+			// in window.markersArray werden global alle Marker gespeichert
+			// nützliche Information
+		</script>
+	</head>
+	<body onload="initPolling()" style="width: 100%;">
+		<div style="width=100%;">
+			<span id="currentPos" style="width: 20%; display: inline-block;">Noch nichts</span>
+			<span id="metersTravelled" style="width: 20%; display: inline-block;">Noch nichts</span>
+			<span id="xp" style="width: 20%; display: inline-block;">Noch nichts</span>
+			<span id="errors" style="width: 20%; display: inline-block;">Noch nichts</span>
+			<span id="status" style="width: 15%; display: inline-block;"></span>
+		</div>
+		<div style="width: 100%">
+			<div id="messages" style="width: 40%; display: inline-block; vertical-align: top;">
+				Hier erscheint die Konsolenausgabe
+			</div>
+			<div style="width: 35%; display: inline-block;">
+				<div style='overflow:hidden;height:550px;width:800px;'>
+					<div id='gmap_canvas' style='height:550px;width:800px;'></div>
+					<style>#gmap_canvas img{max-width:none!important;background:none!important}</style>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
