@@ -5,10 +5,14 @@ import com.pokegoapi.api.map.pokemon.CatchablePokemon;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -29,12 +33,16 @@ public class StatsCounter {
     private long metersTraveled;
     private int xp;
     List<CatchablePokemon> caughtPokemon;
+    private AtomicInteger errorCount;
+    private List<String> messages;
 
     public StatsCounter() {
         this.numCandies = new HashMap<>();
         this.metersTraveled = 0;
         this.xp = 0;
         this.caughtPokemon = new LinkedList<>();
+        this.messages = new ArrayList<>();
+        this.errorCount = new AtomicInteger(0);
     }
 
     public void reset() {
@@ -42,6 +50,8 @@ public class StatsCounter {
         this.metersTraveled = 0;
         this.xp = 0;
         this.caughtPokemon.clear();
+        this.errorCount = new AtomicInteger(0);
+        this.messages.clear();
     }
 
     public void addCandies(PokemonFamilyIdOuterClass.PokemonFamilyId familyId, int[] candies) {
@@ -102,7 +112,7 @@ public class StatsCounter {
 
         for (String name : names.keySet()) {
             // TODO cast to pokemon?
-            System.out.println(name + " (" + names.get(name) + ")");
+            logMessage(name + " (" + names.get(name) + ")");
         }
     }
 
@@ -115,9 +125,40 @@ public class StatsCounter {
     }
 
     public void print() {
-        System.out.println("Zurückgelegte Strecke: " + this.getMetersTraveledAsString());
-        System.out.println("XP: " + this.getXp());
-        System.out.println("Gefangene Pokemon: ");
+        logMessage("Zurückgelegte Strecke: " + this.getMetersTraveledAsString());
+        logMessage("XP: " + this.getXp());
+        logMessage("Gefangene Pokemon: ");
         printCaughtPokemon();
+    }
+    
+    private String timestamp() {
+    	return new SimpleDateFormat("dd.MM.yyyy hh:mm ").format(new Date());
+    }
+    
+    public void logMessage(final Object message) {
+    	final String msgAsString = String.valueOf(message);
+    	System.out.println(timestamp() + msgAsString);
+		messages.add(msgAsString);
+    }
+    
+    public void logError(final Throwable t) {
+    	messages.add(timestamp() + t.getMessage());
+    	t.printStackTrace();
+    	errorCount.incrementAndGet();
+    }
+
+    public void logError(final String message, final Throwable t) {
+    	messages.add(timestamp() + message);
+    	System.out.println(message);
+    	t.printStackTrace();
+    	errorCount.incrementAndGet();
+    }
+    
+    public List<String> getMessages() {
+		return new ArrayList<>(messages);
+	}
+    
+    public int getErrorCount() {
+    	return errorCount.get();
     }
 }
