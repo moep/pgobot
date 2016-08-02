@@ -4,6 +4,7 @@ import com.pokegoapi.api.PokemonGo;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 import lol.moep.pgobot.model.GeoCoordinate;
+import lol.moep.pgobot.util.Actions;
 
 public class PotsdamerPlatzRunner extends AbstractPgoBotRunner {
     public PotsdamerPlatzRunner(PokemonGo go) {
@@ -32,7 +33,7 @@ public class PotsdamerPlatzRunner extends AbstractPgoBotRunner {
         moveTo(x1);
         moveTo(c1);
         lootAllPokestopsWithinRadius(50);
-        tradeInTrashMobs();
+        Actions.tradeInTrashMobs(go, sc);
 
         System.out.println("=== / Potsdamer Platz (looting) ===");
     }
