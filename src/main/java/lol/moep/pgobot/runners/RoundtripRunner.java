@@ -54,12 +54,11 @@ public class RoundtripRunner extends AbstractPgoBotRunner {
 			this.sc.logMessage(String.format("Gehe zu Wegpunkt %d von %d", i, waypoints.size()));
 			lootAllPokestopsWithinRadius(50);
 			moveTo(waypoints.get(i));
-			Actions.tradeInTrashMobs(go, sc);
+			Actions.tradeInDuplicates(go, sc);
 			Actions.tradeInTrashItems(go, sc);
 			i = (i+1) % waypoints.size();
 		}
-		Actions.tradeInTrashMobs(go, sc);
-		Actions.tradeInWeaklings(go, sc);
+		Actions.tradeInDuplicates(go, sc);
 		Actions.tradeInTrashItems(go, sc);
 
 		this.sc.logMessage(String.format("=== / %s (looting) ===", runnerName));
