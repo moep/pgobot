@@ -51,7 +51,7 @@ public class Actions {
 		minCp.put(PokemonIdOuterClass.PokemonId.HORSEA, 400); // Seeper
 		minCp.put(PokemonIdOuterClass.PokemonId.PIDGEOTTO, 500); // Tauboga
 		minCp.put(PokemonIdOuterClass.PokemonId.RATICATE, 500); // Rattikarl
-		minCp.put(PokemonIdOuterClass.PokemonId.ODDISH, 500); // Myrapla
+		minCp.put(PokemonIdOuterClass.PokemonId.ODDISH, 640); // Myrapla
 		minCp.put(PokemonIdOuterClass.PokemonId.KRABBY, 390);
 		minCp.put(PokemonIdOuterClass.PokemonId.CHARMANDER, 400); // Glumanda
 		minCp.put(PokemonIdOuterClass.PokemonId.GASTLY, 400); // Nebulak
@@ -68,6 +68,7 @@ public class Actions {
 		minCp.put(PokemonIdOuterClass.PokemonId.VENONAT, 520); // Bluzuk
 		minCp.put(PokemonIdOuterClass.PokemonId.EEVEE, 340); // Evoli
 		minCp.put(PokemonIdOuterClass.PokemonId.BULBASAUR, 520); // Bisasam
+		minCp.put(PokemonIdOuterClass.PokemonId.BELLSPROUT, 607); // Bellsprout
 
 		tradeInMobs(go, p -> minCp.keySet().contains(p.getPokemonId()) && minCp.get(p.getPokemonId()) > p.getCp(), statistics);
 	}

@@ -21,6 +21,7 @@ import com.pokegoapi.exceptions.RemoteServerException;
 
 import POGOProtos.Inventory.Item.ItemAwardOuterClass;
 import POGOProtos.Inventory.Item.ItemIdOuterClass;
+import POGOProtos.Networking.Responses.EncounterResponseOuterClass.EncounterResponse.Status;
 import lol.moep.pgobot.model.Dictionary;
 import lol.moep.pgobot.model.GeoCoordinate;
 import lol.moep.pgobot.model.Haversine;
@@ -182,21 +183,30 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         for (CatchablePokemon p : pokemons) {
             try {
                 EncounterResult er = p.encounterPokemon();
-
+                
+                // https://github.com/Grover-c13/PokeGOAPI-Java/issues/406
+                if (er.getStatus() == Status.ENCOUNTER_ALREADY_HAPPENED) {
+                	continue;
+                }
+                
                 if (er.wasSuccessful()) {
                     CatchResult res = p.catchPokemon();
                     xp = AbstractPgoBotRunner.listSum(res.getXpList());
                     this.sc.addXp(xp);
                     this.sc.addCaughtPokemon(p);
-                    switch (er.getStatus()) {
-                        case ENCOUNTER_SUCCESS:
+                    switch (res.getStatus()) {
+                        case CATCH_SUCCESS:
                             this.sc.logMessage("Gefangen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + /*" (CP: " + er.getWildPokemon().getPokemonData().getCp() + */") ## XP: " +
                                     xp + " SD: " + listSum(res.getStardustList()));
                             break;
-                        case ENCOUNTER_POKEMON_FLED:
+                        case CATCH_FLEE:
+                        case CATCH_ESCAPE:
+                        case CATCH_MISSED:
                             this.sc.logMessage("Entkommen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + /*" (CP: " + er.getWildPokemon().getPokemonData().getCp() + */ ")");
                             break;
                         default:
+                        	this.sc.logMessage("Unbekanter Status: " + er.getStatus().name());
+                        	break;
                     }
                 }
             } catch (LoginFailedException | RemoteServerException | NoSuchItemException e) {

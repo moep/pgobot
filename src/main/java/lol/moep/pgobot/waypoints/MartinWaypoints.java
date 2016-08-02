@@ -113,5 +113,17 @@ public final class MartinWaypoints {
 		return waypoints;
 	}
 	
-	// Görlitzer Park - Magmas
+	// Görlitzer Park - vereinzelt Magmas (und am Wasser Dratinis?)
+	public static List<GeoCoordinate> goerlitzerPark() {
+		final List<GeoCoordinate> waypoints = new ArrayList<GeoCoordinate>();
+		
+		waypoints.add(new GeoCoordinate(52.498658, 13.432125));
+		waypoints.add(new GeoCoordinate(52.494164, 13.444601));
+		waypoints.add(new GeoCoordinate(52.495385, 13.452637));
+		waypoints.add(new GeoCoordinate(52.498968, 13.449955));
+		waypoints.add(new GeoCoordinate(52.502103, 13.442826));
+		waypoints.add(new GeoCoordinate(52.500745, 13.441158));
+		
+		return waypoints;
+	}
 }
