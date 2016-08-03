@@ -69,11 +69,11 @@ public class ExplorerRunner extends AbstractPgoBotRunner {
         	
 			this.currentPokestop = this.nextPokestop;
 			this.nextPokestop = null;
-			Actions.tradeInTrashMobs(go, sc);
+			Actions.tradeInDuplicates(go, sc);
 			Actions.tradeInTrashItems(go, sc);
         } while (System.currentTimeMillis() < endTime);
         
-        Actions.tradeInWeaklings(go, sc);
+        Actions.tradeInDuplicates(go, sc);
 
         this.sc.logMessage(String.format("=== / %s (looting) ===", runnerName));
     }

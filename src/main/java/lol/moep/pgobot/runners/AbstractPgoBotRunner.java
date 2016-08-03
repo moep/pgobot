@@ -136,7 +136,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
 
         for (GeoCoordinate c : interpolatedCoordinates) {
 
-            this.go.setLocation(c.getLat(), c.getLon(), 0);
+            teleportTo(c);
 
             ++coordinatesVisited;
             sleep(sleepMillisPer10Meters);
