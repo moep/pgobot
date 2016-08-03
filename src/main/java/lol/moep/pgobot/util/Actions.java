@@ -75,6 +75,7 @@ public class Actions {
 	}
 
 	public static void tradeInDuplicates(final PokemonGo go, final StatsCounter sc) {
+		sc.logMessage("Entferne Duplikate");
 		final List<Pokemon> pokemons;
 		try {
 			pokemons= go.getInventories().getPokebank().getPokemons();
@@ -83,19 +84,19 @@ public class Actions {
 			return;
 		}
 		
-		final Map<PokemonId, Integer> maxCp = new HashMap<>();
+		final Map<PokemonId, Double> maxIv = new HashMap<>();
 		for (Pokemon p: pokemons) {
-			if (!maxCp.containsKey(p.getPokemonId())) {
-				maxCp.put(p.getPokemonId(), p.getCp());
+			if (!maxIv.containsKey(p.getPokemonId())) {
+				maxIv.put(p.getPokemonId(), p.getIvRatio());
 			} else {
-				if (maxCp.get(p.getPokemonId()) < p.getCp()) {
-					maxCp.put(p.getPokemonId(), p.getCp());
+				if (maxIv.get(p.getPokemonId()) < p.getIvRatio()) {
+					maxIv.put(p.getPokemonId(), p.getIvRatio());
 				}
 			}
 		}
 		
-		// behalte alle Duplikate mit mind. 90% cp vom besten Pokemon derselben Art
-		tradeInMobs(go, p -> p.getCp() < maxCp.get(p.getPokemonId()) * 0.9, sc);
+		// behalte alle Duplikate mit mind. 90% IV vom besten Pokemon derselben Art
+		tradeInMobs(go, p -> p.getCp() < maxIv.get(p.getPokemonId()) * 0.9, sc);
 	}
 	
 	public static void tradeInMobs(final PokemonGo go, Predicate<? super Pokemon> predicate, final StatsCounter statistics) {
