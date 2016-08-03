@@ -128,7 +128,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     protected void moveTo(GeoCoordinate targetPosition, int sleepMillisPer10Meters) {
         GeoCoordinate currentPosition = new GeoCoordinate(this.go.getLatitude(), this.go.getLongitude());
         double distance = Haversine.getDistanceInMeters(currentPosition, targetPosition);
-        System.out.println("=== Strecke: " + currentPosition + " -> " + targetPosition + " -- " + (int) distance + "m @ 10m / " + sleepMillisPer10Meters + "ms");
+        this.sc.logMessage("=== Strecke: " + currentPosition + " -> " + targetPosition + " -- " + (int) distance + "m @ 10m / " + sleepMillisPer10Meters + "ms");
 
         List<GeoCoordinate> interpolatedCoordinates = getInterpolatedCoordinates(currentPosition, targetPosition);
 
@@ -145,7 +145,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                 try {
                     onMove();
                 } catch (LoginFailedException | RemoteServerException e) {
-                    System.err.println(e.getMessage());
+                    this.sc.logError(e);
                 }
             }
         }
@@ -173,7 +173,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         try {
             pokemons = MapScanner.getCatchablePokemon(go);
         } catch (LoginFailedException | RemoteServerException e) {
-            System.err.println("Serverfehler: Pokémon in der Nähe konnten nicht ermittelt werden.");
+            this.sc.logError(e);
             return;
         }
 
@@ -181,6 +181,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         int xp = 0;
 
         for (CatchablePokemon p : pokemons) {
+            this.sc.logMessage("Fangversuch: " + Dictionary.getNameFromPokemonId(p.getPokemonId()));
             try {
                 EncounterResult er = p.encounterPokemon();
 
@@ -209,10 +210,8 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                         	break;
                     }
                 }
-            } catch (LoginFailedException | RemoteServerException e) {
-                System.err.println("Serverfehler beim Fangen von " + p.getPokemonId().name());
-            } catch (NoSuchItemException e) {
-                System.err.println("Serverfehler beim Fangen von " + p.getPokemonId().name() + ": " + e.getMessage());
+            } catch (LoginFailedException | RemoteServerException | NoSuchItemException e) {
+                this.sc.logError(e);
             }
 
             // TODO more realistic value?
@@ -246,24 +245,24 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                 ++numLooted;
                 PokestopLootResult lootResult = ps.loot();
                 xp = lootResult.getExperience();
-                System.out.println("Loote (" + numLooted + "/" + numPokestops + "): " + ps.getDetails().getName()
+                this.sc.logMessage("Loote (" + numLooted + "/" + numPokestops + "): " + ps.getDetails().getName()
                         + " ## " + lootResult.getResult().name() + " ## " + xp + "EXP");
 
                 this.sc.addXp(xp);
 //
 //                    for (ItemAwardOuterClass.ItemAward ia : lootResult.getItemsAwarded()) {
-//                        System.out.println("  " + ia.getItemId().name() + "(" + ia.getItemCount() + ")");
+//                        this.sc.logMessage("  " + ia.getItemId().name() + "(" + ia.getItemCount() + ")");
 //                    }
 
                 Map<ItemIdOuterClass.ItemId, Long> collect = lootResult.getItemsAwarded().stream()
                         .collect(Collectors.groupingBy(ItemAwardOuterClass.ItemAward::getItemId, Collectors.counting()));
 
                 for (ItemIdOuterClass.ItemId id : collect.keySet()) {
-                    System.out.println("  " + id.name() + " (" + collect.get(id) + ")");
+                    this.sc.logMessage("  " + id.name() + " (" + collect.get(id) + ")");
                 }
 
             } else {
-                System.out.println("Ignoriere: " + ps.getDetails().getName());
+                this.sc.logMessage("Ignoriere: " + ps.getDetails().getName());
             }
         }
     }
