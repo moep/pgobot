@@ -26,6 +26,7 @@ import lol.moep.pgobot.model.Dictionary;
 import lol.moep.pgobot.model.GeoCoordinate;
 import lol.moep.pgobot.model.Haversine;
 import lol.moep.pgobot.model.StatsCounter;
+import lol.moep.pgobot.util.Actions;
 import lol.moep.pgobot.util.MapScanner;
 
 /**
@@ -42,7 +43,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     private final int moveActionDistance;
 
     protected enum SpeedWaitTime {
-        WALK(2400),
+        WALK(3600),
         DRIVE(500);
 
         private final int val;
@@ -93,14 +94,6 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         return ret;
     }
 
-    private static void sleep(int timeMilis) {
-        try {
-            Thread.sleep(timeMilis);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
     protected void teleportTo(final GeoCoordinate targetPosition) {
     	this.go.setLocation(targetPosition.getLat(), targetPosition.getLon(), 0);
     	this.lastKnownPosition = targetPosition;
@@ -139,7 +132,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
             teleportTo(c);
 
             ++coordinatesVisited;
-            sleep(sleepMillisPer10Meters);
+            Actions.sleep(sleepMillisPer10Meters);
 
             if (coordinatesVisited % (this.moveActionDistance / 10) == 0) {
                 try {
@@ -187,6 +180,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
 
                 // https://github.com/Grover-c13/PokeGOAPI-Java/issues/406
                 if (er.getStatus() == Status.ENCOUNTER_ALREADY_HAPPENED) {
+                    this.sc.logMessage("Already happened");
                 	continue;
                 }
 
@@ -215,7 +209,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
             }
 
             // TODO more realistic value?
-            sleep(1000);
+            Actions.sleep(1000);
         }
     }
 
