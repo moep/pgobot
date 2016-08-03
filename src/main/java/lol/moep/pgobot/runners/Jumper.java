@@ -1,7 +1,5 @@
 package lol.moep.pgobot.runners;
 
-import java.util.List;
-
 import com.pokegoapi.api.PokemonGo;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
@@ -12,14 +10,14 @@ import lol.moep.pgobot.util.Actions;
 /**
  * @author Hicks
  */
-public class WaypointRunner extends AbstractPgoBotRunner {
+public class Jumper extends AbstractPgoBotRunner {
 
-	private final List<GeoCoordinate> waypoints;
+	private final GeoCoordinate jumpPoint;
 
-	public WaypointRunner(final PokemonGo go, final List<GeoCoordinate> waypoints) {
+	public Jumper(final PokemonGo go, final double lat, final double lon) {
 		super(go);
 
-		this.waypoints = waypoints;
+		this.jumpPoint = new GeoCoordinate(lat, lon);
 	}
 
 	@Override
@@ -31,19 +29,10 @@ public class WaypointRunner extends AbstractPgoBotRunner {
 
 		this.sc.logMessage(String.format("=== %s (looting) ===", runnerName));
 
-		teleportTo(waypoints.get(0));
-
-		for (int i = 1; i < waypoints.size(); i++) {
-			this.sc.logMessage(String.format("Gehe zu Wegpunkt %d von %d", i, waypoints.size()));
-			lootAllPokestopsWithinRadius(50);
-			moveTo(waypoints.get(i));
-			Actions.tradeInDuplicates(go, sc);
-			Actions.tradeInTrashItems(go, sc);
-		}
+		teleportTo(jumpPoint);
+		findAndCatchPokemon();
 		lootAllPokestopsWithinRadius(50);
 
-		moveTo(waypoints.get(0));
-		lootAllPokestopsWithinRadius(50);
 		Actions.tradeInDuplicates(go, sc);
 		Actions.tradeInTrashItems(go, sc);
 
