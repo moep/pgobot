@@ -96,7 +96,7 @@ public class Actions {
 		}
 		
 		// behalte alle Duplikate mit mind. 90% IV vom besten Pokemon derselben Art
-		tradeInMobs(go, p -> p.getCp() < maxIv.get(p.getPokemonId()) * 0.9, sc);
+		tradeInMobs(go, p -> p.getIvRatio() < maxIv.get(p.getPokemonId()) * 0.9, sc);
 	}
 	
 	public static void tradeInMobs(final PokemonGo go, Predicate<? super Pokemon> predicate, final StatsCounter statistics) {
