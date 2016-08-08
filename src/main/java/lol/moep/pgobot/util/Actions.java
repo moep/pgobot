@@ -40,7 +40,7 @@ public class Actions {
 				PokemonIdOuterClass.PokemonId.DROWZEE, PokemonIdOuterClass.PokemonId.DIGLETT,
 				PokemonIdOuterClass.PokemonId.CATERPIE);
 
-		tradeInMobs(go, p -> banTypes.contains(p.getPokemonId()) && p.getIvRatio() < 90.0d, statistics);
+		tradeInMobs(go, p -> banTypes.contains(p.getPokemonId()) && p.getIvRatio() < 0.9d, statistics);
 	}
 
 	// TODO aus Datei lesen (die auf .gitignore steht!)
