@@ -40,7 +40,7 @@ public class Actions {
 				PokemonIdOuterClass.PokemonId.DROWZEE, PokemonIdOuterClass.PokemonId.DIGLETT,
 				PokemonIdOuterClass.PokemonId.CATERPIE);
 
-		tradeInMobs(go, p -> banTypes.contains(p.getPokemonId()), statistics);
+		tradeInMobs(go, p -> banTypes.contains(p.getPokemonId()) && p.getIvRatio() < 90.0d, statistics);
 	}
 
 	// TODO aus Datei lesen (die auf .gitignore steht!)
@@ -250,6 +250,22 @@ public class Actions {
 			}
 		}
 	}
+
+	public static void renameToIv(final PokemonGo go, final StatsCounter sc) throws LoginFailedException, RemoteServerException {
+		sc.logMessage("Benenne Pokémon um...");
+		go.getInventories().getPokebank().getPokemons().stream()
+			.filter(p -> p.getNickname() == null || p.getNickname().isEmpty())
+			.forEach(p -> {
+				try {
+					System.out.println(Dictionary.getNameFromPokemonId(p.getPokemonId()) + " -> " + p.getIndividualAttack() + "/" + p.getIndividualDefense() + "/" + p.getIndividualStamina());
+					p.renamePokemon(p.getIndividualAttack() + "/" + p.getIndividualDefense() + "/" + p.getIndividualStamina());
+					sleep(200);
+				} catch (LoginFailedException | RemoteServerException e) {
+					sc.logError("Fehler beim Umbenennen: ", e);
+				}
+			});
+	}
+
 
 	private static void removeItems(final PokemonGo go, Item item, Integer amount, final StatsCounter sc) {
 		// aktuell keine retries, weil ich mir nicht sicher bin, ob die items nicht auch bei FAILED entfernt werden
