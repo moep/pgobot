@@ -191,13 +191,14 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                     this.sc.addCaughtPokemon(p);
                     switch (res.getStatus()) {
                         case CATCH_SUCCESS:
-                            this.sc.logMessage("Gefangen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + /*" (CP: " + er.getWildPokemon().getPokemonData().getCp() + */") ## XP: " +
-                                    xp + " SD: " + listSum(res.getStardustList()));
+                            this.sc.logMessage("Gefangen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) +
+                                    " IV: " + er.getPokemonData().getIndividualAttack() + "/" + er.getPokemonData().getIndividualDefense() + "/" + er.getPokemonData().getIndividualStamina() +
+                                    " XP: " + xp + " SD: " + listSum(res.getStardustList()));
                             break;
                         case CATCH_FLEE:
                         case CATCH_ESCAPE:
                         case CATCH_MISSED:
-                            this.sc.logMessage("Entkommen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) + /*" (CP: " + er.getWildPokemon().getPokemonData().getCp() + */ ")");
+                            this.sc.logMessage("Entkommen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()));
                             break;
                         default:
                         	this.sc.logMessage("Unbekanter Status: " + er.getStatus().name());
