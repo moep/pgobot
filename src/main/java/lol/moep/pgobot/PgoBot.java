@@ -2,6 +2,7 @@ package lol.moep.pgobot;
 
 import com.pokegoapi.api.PokemonGo;
 import com.pokegoapi.auth.GoogleUserCredentialProvider;
+import com.pokegoapi.exceptions.AsyncPokemonGoException;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 import lol.moep.pgobot.runners.InteractiveRunner;
@@ -31,7 +32,7 @@ public class PgoBot {
 
         try {
             provider = getCredentialProvider(httpClient);
-        } catch (LoginFailedException | RemoteServerException e) {
+        } catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
             System.err.println("Error: " + e.getMessage());
             return;
         }
@@ -46,7 +47,7 @@ public class PgoBot {
             r.getStatistics().print();
 
 
-        } catch (LoginFailedException | RemoteServerException e) {
+        } catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
             System.err.println("Error: " + e.getMessage());
         }
     }

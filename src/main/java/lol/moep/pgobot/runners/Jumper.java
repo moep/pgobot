@@ -6,12 +6,15 @@ import com.pokegoapi.exceptions.RemoteServerException;
 
 import lol.moep.pgobot.model.GeoCoordinate;
 import lol.moep.pgobot.util.Actions;
+import lol.moep.pgobot.util.PoGoLogger;
 
 /**
  * @author Hicks
  */
 public class Jumper extends AbstractPgoBotRunner {
 
+	private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
+	
 	private final GeoCoordinate jumpPoint;
 
 	public Jumper(final PokemonGo go, final double lat, final double lon) {
@@ -27,7 +30,7 @@ public class Jumper extends AbstractPgoBotRunner {
 			runnerName = runnerName.substring(0, runnerName.lastIndexOf("Runner"));
 		}
 
-		this.sc.logMessage(String.format("=== %s (looting) ===", runnerName));
+		LOGGER.logMessage(String.format("=== %s (looting) ===", runnerName));
 
 		teleportTo(jumpPoint);
 		findAndCatchPokemon();
@@ -36,7 +39,7 @@ public class Jumper extends AbstractPgoBotRunner {
 		Actions.tradeInDuplicates(go, sc);
 		Actions.tradeInTrashItems(go, sc);
 
-		this.sc.logMessage(String.format("=== / %s (looting) ===", runnerName));
+		LOGGER.logMessage(String.format("=== / %s (looting) ===", runnerName));
 	}
 	
 	@Override
