@@ -1,6 +1,8 @@
 package lol.moep.pgobot.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +102,53 @@ public class Actions {
 		
 		// behalte alle Duplikate mit mind. 90% IV vom besten Pokemon derselben Art
 		tradeInMobs(go, p -> p.getIvRatio() < maxIv.get(p.getPokemonId()) * 0.95, sc);
+	}
+	
+	/**
+	 * Verschickt Duplikate. Behält die besten 3 Pokemon, die mind. 95% der IV
+	 * Ratio des besten Pokemon haben. Favoriten werden immer behalten.
+	 * 
+	 * @param go
+	 * @param sc
+	 */
+	public static void tradeInDuplicates2(final PokemonGo go, final StatsCounter sc) {
+		LOGGER.logMessage("Entferne Duplikate");
+		final List<Pokemon> pokemons;
+		try {
+			pokemons= go.getInventories().getPokebank().getPokemons();
+		} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
+			LOGGER.logError(e);
+			return;
+		}
+		
+		final Map<PokemonId, Double> maxIv = new HashMap<>();
+		final Map<PokemonId, List<Pokemon>> pokeMap = new HashMap<>();
+		for (Pokemon p: pokemons) {
+			if (!maxIv.containsKey(p.getPokemonId())) {
+				maxIv.put(p.getPokemonId(), p.getIvRatio());
+			} else {
+				if (maxIv.get(p.getPokemonId()) < p.getIvRatio()) {
+					maxIv.put(p.getPokemonId(), p.getIvRatio());
+				}
+			}
+			if (!pokeMap.containsKey(p.getPokemonId())) {
+				pokeMap.put(p.getPokemonId(), new ArrayList<>());
+			}
+			// Favoriten gar nicht erst betrachten -> die x besten Nicht-Favoriten und die Favoriten werden behalten
+			if (!p.isFavorite()) {
+				pokeMap.get(p.getPokemonId()).add(p);
+			}
+		}
+		for (List<Pokemon> pokeList: pokeMap.values()) {
+			Collections.sort(pokeList, new PokemonComparator());
+			Collections.reverse(pokeList);
+		}
+		// maximal 3 Nicht-Favoriten von der gleichen Sorte
+		tradeInMobs(go, p -> 
+			p.getIvRatio() < maxIv.get(p.getPokemonId()) * 0.95
+			|| pokeMap.get(p.getPokemonId()).indexOf(p) > -1 &&
+				pokeMap.get(p.getPokemonId()).indexOf(p) >= 3	
+				, sc);
 	}
 	
 	public static void tradeInMobs(final PokemonGo go, Predicate<? super Pokemon> predicate, final StatsCounter statistics) {
