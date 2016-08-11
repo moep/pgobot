@@ -7,6 +7,9 @@ import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 import lol.moep.pgobot.runners.InteractiveRunner;
 import lol.moep.pgobot.runners.PgoBotRunner;
+import lol.moep.pgobot.runners.PotsdamerPlatzRunner;
+import lol.moep.pgobot.util.logger.Logger;
+import lol.moep.pgobot.util.logger.LoggerFactory;
 import okhttp3.OkHttpClient;
 
 import java.io.FileInputStream;
@@ -22,11 +25,19 @@ import java.util.Scanner;
  */
 public class PgoBot {
 
-    private static final String TOKEN_PROPERTIES_FILE_NAME = "token.properties";
+    public static final String TOKEN_PROPERTIES_FILE_NAME = "token.properties";
+
+    private static final Logger log = LoggerFactory.getLoggerInstance();
 
     public static void main(String[] args) {
         final OkHttpClient httpClient = new OkHttpClient();
         final GoogleUserCredentialProvider provider;
+
+        log.red("  ***** ");
+        log.red(" *******");
+        log.gray("****o**** PgoBot - You're playing for Team Rocket now!");
+        log.info(" *******");
+        log.info("  ***** ");
 
         // Auth part
 
@@ -42,7 +53,7 @@ public class PgoBot {
         try {
             PokemonGo go = new PokemonGo(provider, httpClient);
 
-            PgoBotRunner r = new InteractiveRunner(go);
+            PgoBotRunner r = new PotsdamerPlatzRunner(go);
             r.startTour();
             r.getStatistics().print();
 

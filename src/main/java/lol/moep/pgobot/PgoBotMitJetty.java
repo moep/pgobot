@@ -9,6 +9,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import lol.moep.pgobot.util.logger.Logger;
+import lol.moep.pgobot.util.logger.LoggerFactory;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -20,11 +22,8 @@ import com.pokegoapi.auth.GoogleUserCredentialProvider;
 
 import lol.moep.pgobot.model.GeoCoordinate;
 import lol.moep.pgobot.model.StatsCounter;
-import lol.moep.pgobot.runners.Jumper;
 import lol.moep.pgobot.runners.PgoBotRunner;
 import lol.moep.pgobot.runners.RoundtripRunner;
-import lol.moep.pgobot.runners.WaypointRunner;
-import lol.moep.pgobot.util.PoGoLogger;
 import lol.moep.pgobot.waypoints.MartinWaypoints;
 import okhttp3.OkHttpClient;
 
@@ -33,7 +32,7 @@ import okhttp3.OkHttpClient;
  */
 public class PgoBotMitJetty {
 	
-	private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
+	private static final Logger LOGGER = LoggerFactory.getLoggerInstance();
 
 	private static final String TOKEN_PROPERTIES_FILE_NAME = "token.properties";
 	
@@ -140,7 +139,7 @@ public class PgoBotMitJetty {
 			runner.startTour();
 			
 			runner.getStatistics().print();
-			LOGGER.logMessage("Fertig Meister!");
+			LOGGER.info("Fertig Meister!");
 			
 			// ein wenig warten, damit die Web Anwendung die letzte Aktualisierung mitbekommt
 	        try {

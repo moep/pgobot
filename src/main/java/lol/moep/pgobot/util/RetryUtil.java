@@ -3,10 +3,12 @@ package lol.moep.pgobot.util;
 import java.util.function.Consumer;
 
 import lol.moep.pgobot.model.StatsCounter;
+import lol.moep.pgobot.util.logger.Logger;
+import lol.moep.pgobot.util.logger.LoggerFactory;
 
 public class RetryUtil {
 	
-	private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
+	private static final Logger LOGGER = LoggerFactory.getLoggerInstance();
 
 	public static void retry(final Runnable procedure, final int times, final StatsCounter statistics) {
 		if (times <= 0) {

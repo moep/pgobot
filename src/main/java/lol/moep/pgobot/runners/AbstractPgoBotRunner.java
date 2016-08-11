@@ -29,14 +29,15 @@ import lol.moep.pgobot.model.Haversine;
 import lol.moep.pgobot.model.StatsCounter;
 import lol.moep.pgobot.util.Actions;
 import lol.moep.pgobot.util.MapScanner;
-import lol.moep.pgobot.util.PoGoLogger;
+import lol.moep.pgobot.util.logger.Logger;
+import lol.moep.pgobot.util.logger.LoggerFactory;
 
 /**
  * Created by moep on 28.07.16.
  */
 public abstract class AbstractPgoBotRunner implements PgoBotRunner {
 	
-	private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
+	private static final Logger LOGGER = LoggerFactory.getLoggerInstance();
 	
     protected final PokemonGo go;
     protected final StatsCounter sc;
@@ -127,7 +128,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     protected void moveTo(GeoCoordinate targetPosition, int sleepMillisPer10Meters) {
         GeoCoordinate currentPosition = new GeoCoordinate(this.go.getLatitude(), this.go.getLongitude());
         double distance = Haversine.getDistanceInMeters(currentPosition, targetPosition);
-        LOGGER.logMessage("=== Strecke: " + currentPosition + " -> " + targetPosition + " -- " + (int) distance + "m @ 10m / " + sleepMillisPer10Meters + "ms");
+        LOGGER.mangenta("=== Strecke: " + currentPosition + " -> " + targetPosition + " -- " + (int) distance + "m @ 10m / " + sleepMillisPer10Meters + "ms");
 
         List<GeoCoordinate> interpolatedCoordinates = getInterpolatedCoordinates(currentPosition, targetPosition);
 
@@ -185,13 +186,12 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         int xp = 0;
 
         for (CatchablePokemon p : pokemons) {
-        	LOGGER.logMessage("Fangversuch: " + Dictionary.getNameFromPokemonId(p.getPokemonId()));
             try {
                 EncounterResult er = p.encounterPokemon();
 
                 // https://github.com/Grover-c13/PokeGOAPI-Java/issues/406
                 if (er.getStatus() == Status.ENCOUNTER_ALREADY_HAPPENED) {
-                	LOGGER.logMessage("Already happened");
+                	LOGGER.red("Already happened");
                 	continue;
                 }
 
@@ -202,17 +202,17 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                     this.sc.addCaughtPokemon(p);
                     switch (res.getStatus()) {
                         case CATCH_SUCCESS:
-                        	LOGGER.logMessage("Gefangen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) +
-                                    " IV: " + er.getPokemonData().getIndividualAttack() + "/" + er.getPokemonData().getIndividualDefense() + "/" + er.getPokemonData().getIndividualStamina() +
-                                    " XP: " + xp + " SD: " + listSum(res.getStardustList()));
+                        	LOGGER.green("Gefangen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) +
+                                    " (IV: " + er.getPokemonData().getIndividualAttack() + "/" + er.getPokemonData().getIndividualDefense() + "/" + er.getPokemonData().getIndividualStamina() +
+                                    " XP: " + xp + " SD: " + listSum(res.getStardustList()) + ")");
                             break;
                         case CATCH_FLEE:
                         case CATCH_ESCAPE:
                         case CATCH_MISSED:
-                        	LOGGER.logMessage("Entkommen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()));
+                        	LOGGER.red("Entkommen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()));
                             break;
                         default:
-                        	LOGGER.logMessage("Unbekanter Status: " + res.getStatus().name());
+                        	LOGGER.red("Unbekanter Status: " + res.getStatus().name());
                         	break;
                     }
                 }
@@ -251,7 +251,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                 ++numLooted;
                 PokestopLootResult lootResult = ps.loot();
                 xp = lootResult.getExperience();
-                LOGGER.logMessage("Loote (" + numLooted + "/" + numPokestops + "): " + ps.getDetails().getName()
+                LOGGER.blue("Loote (" + numLooted + "/" + numPokestops + "): " + ps.getDetails().getName()
                         + " ## " + lootResult.getResult().name() + " ## " + xp + "EXP");
 
                 this.sc.addXp(xp);
@@ -264,11 +264,11 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                         .collect(Collectors.groupingBy(ItemAwardOuterClass.ItemAward::getItemId, Collectors.counting()));
 
                 for (ItemIdOuterClass.ItemId id : collect.keySet()) {
-                	LOGGER.logMessage("  " + id.name() + " (" + collect.get(id) + ")");
+                	LOGGER.blue("  " + id.name() + " (" + collect.get(id) + ")");
                 }
 
             } else {
-            	LOGGER.logMessage("Ignoriere: " + ps.getDetails().getName());
+            	LOGGER.blue("Ignoriere: " + ps.getDetails().getName());
             }
         }
     }
@@ -326,10 +326,10 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         final Set<EggPokemon> eggs;
         try {
 			eggs = this.go.getInventories().getHatchery().getEggs();
-			LOGGER.logMessage("Eier");
+			LOGGER.yellow("Eier");
 			for (EggPokemon e : eggs) {
 				if (e.isIncubate()) {
-					LOGGER.logMessage(e.getEggKmWalked() + "/" + e.getEggKmWalkedTarget());
+					LOGGER.yellow(e.getEggKmWalked() + "/" + e.getEggKmWalkedTarget());
 				}
 			}
 		} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {

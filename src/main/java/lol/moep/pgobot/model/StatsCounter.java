@@ -12,14 +12,15 @@ import java.util.stream.Collectors;
 import com.pokegoapi.api.map.pokemon.CatchablePokemon;
 
 import POGOProtos.Enums.PokemonFamilyIdOuterClass;
-import lol.moep.pgobot.util.PoGoLogger;
+import lol.moep.pgobot.util.logger.Logger;
+import lol.moep.pgobot.util.logger.LoggerFactory;
 
 /**
  * Created by moep on 28.07.16.
  */
 public class StatsCounter {
     private final static DecimalFormat distanceInKmFormat = initDecimalFormat();
-    private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
+    private static final Logger LOGGER = LoggerFactory.getLoggerInstance();
 
     private static DecimalFormat initDecimalFormat() {
         DecimalFormat df = new DecimalFormat("#.##");
@@ -105,7 +106,7 @@ public class StatsCounter {
 
         for (String name : names.keySet()) {
             // TODO cast to pokemon?
-        	LOGGER.logMessage(name + " (" + names.get(name) + ")");
+        	LOGGER.green(name + " (" + names.get(name) + ")");
         }
     }
 
@@ -118,9 +119,9 @@ public class StatsCounter {
     }
 
     public void print() {
-    	LOGGER.logMessage("Zurückgelegte Strecke: " + this.getMetersTraveledAsString());
-    	LOGGER.logMessage("XP: " + this.getXp());
-    	LOGGER.logMessage("Gefangene Pokemon: ");
+    	LOGGER.mangenta("Zurückgelegte Strecke: " + this.getMetersTraveledAsString());
+    	LOGGER.yellow("XP: " + this.getXp());
+    	LOGGER.green("Gefangene Pokemon: ");
         printCaughtPokemon();
     }
 }
