@@ -13,6 +13,7 @@ import com.pokegoapi.api.gym.Gym;
 import com.pokegoapi.api.inventory.Item;
 import com.pokegoapi.api.inventory.ItemBag;
 import com.pokegoapi.api.pokemon.Pokemon;
+import com.pokegoapi.exceptions.AsyncPokemonGoException;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 
@@ -30,10 +31,12 @@ import lol.moep.pgobot.model.StatsCounter;
 
 public class Actions {
 	
+	private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
+	
 	// TODO Version ohne statische Methode, die im Konstruktor go und sc bekommt
 
 	public static void tradeInTrashMobs(final PokemonGo go, final StatsCounter statistics) {
-		statistics.logMessage("Verschicke Trashmobs");
+		LOGGER.logMessage("Verschicke Trashmobs");
 		final List<PokemonIdOuterClass.PokemonId> banTypes = Arrays.asList(PokemonIdOuterClass.PokemonId.WEEDLE,
 				PokemonIdOuterClass.PokemonId.PIDGEY, PokemonIdOuterClass.PokemonId.RATTATA,
 				PokemonIdOuterClass.PokemonId.SPEAROW, PokemonIdOuterClass.PokemonId.ZUBAT,
@@ -45,7 +48,7 @@ public class Actions {
 
 	// TODO aus Datei lesen (die auf .gitignore steht!)
 	public static void tradeInWeaklings(final PokemonGo go, final StatsCounter statistics) {
-		statistics.logMessage("Verschicke Schwächlinge");
+		LOGGER.logMessage("Verschicke Schwächlinge");
 		final Map<PokemonIdOuterClass.PokemonId, Integer> minCp = new HashMap<PokemonIdOuterClass.PokemonId, Integer>();
 		minCp.put(PokemonIdOuterClass.PokemonId.SCYTHER, 1000); // Sichlor
 		minCp.put(PokemonIdOuterClass.PokemonId.JYNX, 900); // Rossane
@@ -75,12 +78,12 @@ public class Actions {
 	}
 
 	public static void tradeInDuplicates(final PokemonGo go, final StatsCounter sc) {
-		sc.logMessage("Entferne Duplikate");
+		LOGGER.logMessage("Entferne Duplikate");
 		final List<Pokemon> pokemons;
 		try {
 			pokemons= go.getInventories().getPokebank().getPokemons();
-		} catch (LoginFailedException | RemoteServerException e) {
-			sc.logError(e);
+		} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
+			LOGGER.logError(e);
 			return;
 		}
 		
@@ -96,15 +99,15 @@ public class Actions {
 		}
 		
 		// behalte alle Duplikate mit mind. 90% IV vom besten Pokemon derselben Art
-		tradeInMobs(go, p -> p.getIvRatio() < maxIv.get(p.getPokemonId()) * 0.9, sc);
+		tradeInMobs(go, p -> p.getIvRatio() < maxIv.get(p.getPokemonId()) * 0.95, sc);
 	}
 	
 	public static void tradeInMobs(final PokemonGo go, Predicate<? super Pokemon> predicate, final StatsCounter statistics) {
 		final List<Pokemon> pokemons;
 		try {
 			pokemons= go.getInventories().getPokebank().getPokemons();
-		} catch (LoginFailedException | RemoteServerException e) {
-			statistics.logError(e);
+		} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
+			LOGGER.logError(e);
 			return;
 		}
 		
@@ -115,11 +118,11 @@ public class Actions {
 		// TODO exception handling
 		// TODO candy statistics
 		filtered.forEach(p -> {
-			statistics.logMessage(Dictionary.getNameFromPokemonId(p.getPokemonId()) + " - " + p.getCp());
+			LOGGER.logMessage(Dictionary.getNameFromPokemonId(p.getPokemonId()) + " - " + p.getCp());
 			try {
 				transfer(p, statistics);
-			} catch (LoginFailedException | RemoteServerException e) {
-				statistics.logError(e);
+			} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
+				LOGGER.logError(e);
 			}
 		});
 	}
@@ -139,22 +142,22 @@ public class Actions {
 	 */
 	private static void transfer(Pokemon p, int ttl, final StatsCounter statistics) {
 		if (ttl == 0) {
-			statistics.logMessage("Höre auf zu versuchen das Pokemon zu verschicken.");
+			LOGGER.logMessage("Höre auf zu versuchen das Pokemon zu verschicken.");
 			return;
 		}
 
 		ReleasePokemonResponseOuterClass.ReleasePokemonResponse.Result result = null;
 		try {
 			result = p.transferPokemon();
-			statistics.logMessage(result.getValueDescriptor());
+			LOGGER.logMessage(result.getValueDescriptor());
 			sleep(1000);
 		} catch (Exception e) {
 			result = null;
-			statistics.logError(e);
+			LOGGER.logError(e);
 		}
 
 		if (result == null || "FAILED".equals(String.valueOf(result.getValueDescriptor()))) {
-			statistics.logMessage("Retry");
+			LOGGER.logMessage("Retry");
 			transfer(p, ttl - 1, statistics);
 		}
 	}
@@ -178,8 +181,8 @@ public class Actions {
 			final Result result = battle.start();
 			
 			switch (result) {
-				case SUCCESS: statistics.logMessage("Kampf gestartet!"); break; // super!
-				default: statistics.logMessage("Kampf konnte nicht gestartet werden!"); return; // nicht so toll!
+				case SUCCESS: LOGGER.logMessage("Kampf gestartet!"); break; // super!
+				default: LOGGER.logMessage("Kampf konnte nicht gestartet werden!"); return; // nicht so toll!
 			}
 			
 			AttackGymResponse attack;
@@ -193,8 +196,8 @@ public class Actions {
 			}
 
 			switch (battle.getOutcome()) {
-				case VICTORY: statistics.logMessage("Gewonnen!"); break;
-				default: statistics.logMessage("Verloren!"); break;
+				case VICTORY: LOGGER.logMessage("Gewonnen!"); break;
+				default: LOGGER.logMessage("Verloren!"); break;
 			}
 			
 			for (Pokemon p: battleTeam) {
@@ -218,13 +221,13 @@ public class Actions {
 					}
 				}
 			}
-		} catch (LoginFailedException | RemoteServerException e) {
-			statistics.logError(e);
+		} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
+			LOGGER.logError(e);
 		}
 	}
 	
 	public static void tradeInTrashItems(final PokemonGo go, final StatsCounter sc) {
-		sc.logMessage("Recycle Trash Items");
+		LOGGER.logMessage("Recycle Trash Items");
 		
 		final Map<ItemId, Integer> itemLimits = new HashMap<ItemId, Integer>();
 		itemLimits.put(ItemId.ITEM_POTION, 0);
@@ -235,8 +238,8 @@ public class Actions {
 		final ItemBag itemBag;
 		try {
 			itemBag = go.getInventories().getItemBag();
-		} catch (LoginFailedException | RemoteServerException e) {
-			sc.logError(e);
+		} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
+			LOGGER.logError(e);
 			return;
 		}
 		
@@ -245,14 +248,14 @@ public class Actions {
 			item = itemBag.getItem(entry.getKey());
 			Integer limit = entry.getValue();
 			if (item != null && item.getCount() > limit) {
-				sc.logMessage(String.format("Reduziere item %s auf %d Stück", item.getItemId().name(), limit));
+				LOGGER.logMessage(String.format("Reduziere item %s auf %d Stück", item.getItemId().name(), limit));
 				removeItems(go, item, item.getCount() - limit, sc);
 			}
 		}
 	}
 
 	public static void renameToIv(final PokemonGo go, final StatsCounter sc) throws LoginFailedException, RemoteServerException {
-		sc.logMessage("Benenne Pokémon um...");
+		LOGGER.logMessage("Benenne Pokémon um...");
 		go.getInventories().getPokebank().getPokemons().stream()
 			.filter(p -> p.getNickname() == null || p.getNickname().isEmpty())
 			.forEach(p -> {
@@ -260,8 +263,8 @@ public class Actions {
 					System.out.println(Dictionary.getNameFromPokemonId(p.getPokemonId()) + " -> " + p.getIndividualAttack() + "/" + p.getIndividualDefense() + "/" + p.getIndividualStamina());
 					p.renamePokemon(p.getIndividualAttack() + "/" + p.getIndividualDefense() + "/" + p.getIndividualStamina());
 					sleep(200);
-				} catch (LoginFailedException | RemoteServerException e) {
-					sc.logError("Fehler beim Umbenennen: ", e);
+				} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
+					LOGGER.logError("Fehler beim Umbenennen: ", e);
 				}
 			});
 	}
@@ -281,14 +284,14 @@ public class Actions {
 			final ItemBag itemBag = go.getInventories().getItemBag();
 		
 			RecycleInventoryItemResponse.Result result = itemBag.removeItem(item.getItemId(), amount);
-			sc.logMessage(result.getValueDescriptor());
+			LOGGER.logMessage(result.getValueDescriptor());
 			sleep(1000);
 			if ("FAILED".equals(String.valueOf(result.getValueDescriptor()))) {
-				sc.logMessage("Retry");
+				LOGGER.logMessage("Retry");
 				removeItems(go, item, amount, ttl-1, sc);
 			}
-		} catch (LoginFailedException | RemoteServerException e) {
-			sc.logError(e);
+		} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
+			LOGGER.logError(e);
 		}
 	}
 	

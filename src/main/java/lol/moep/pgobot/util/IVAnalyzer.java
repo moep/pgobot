@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.pokegoapi.api.PokemonGo;
 import com.pokegoapi.api.pokemon.Pokemon;
+import com.pokegoapi.exceptions.AsyncPokemonGoException;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 
@@ -14,7 +15,7 @@ public class IVAnalyzer {
 		List<Pokemon> pokemons;
 		try {
 			pokemons = go.getInventories().getPokebank().getPokemons();
-		} catch (LoginFailedException | RemoteServerException e) {
+		} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
 			// TODO
 			e.printStackTrace();
 			return;
@@ -29,7 +30,7 @@ public class IVAnalyzer {
 				
 				try {
 					p.renamePokemon("A" + atk + " D" + def + " S" + sta);
-				} catch (LoginFailedException | RemoteServerException e) {
+				} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -38,7 +39,7 @@ public class IVAnalyzer {
 				if (atk == 15 && def == 15 && sta == 15) {
 					try {
 						p.setFavoritePokemon(true);
-					} catch (LoginFailedException | RemoteServerException e) {
+					} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}

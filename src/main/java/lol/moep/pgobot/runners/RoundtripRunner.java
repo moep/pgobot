@@ -8,6 +8,7 @@ import com.pokegoapi.exceptions.RemoteServerException;
 
 import lol.moep.pgobot.model.GeoCoordinate;
 import lol.moep.pgobot.util.Actions;
+import lol.moep.pgobot.util.PoGoLogger;
 
 /**
  * Besucht alle Wegpunkte nacheinander und fängt danach wieder von vorne an, bis
@@ -16,6 +17,8 @@ import lol.moep.pgobot.util.Actions;
  * @author Hicks
  */
 public class RoundtripRunner extends AbstractPgoBotRunner {
+	
+	private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
 
 	private final long tripTime;
 	private final List<GeoCoordinate> waypoints;
@@ -42,7 +45,7 @@ public class RoundtripRunner extends AbstractPgoBotRunner {
 			runnerName = runnerName.substring(0, runnerName.lastIndexOf("Runner"));
 		}
 
-		this.sc.logMessage(String.format("=== %s (looting) ===", runnerName));
+		LOGGER.logMessage(String.format("=== %s (looting) ===", runnerName));
 
 		teleportTo(waypoints.get(0));
 		int i = 1;
@@ -51,7 +54,7 @@ public class RoundtripRunner extends AbstractPgoBotRunner {
 		final long endTime = startTime + (tripTime * 1000 * 60);
 
 		while (System.currentTimeMillis() < endTime) {
-			this.sc.logMessage(String.format("Gehe zu Wegpunkt %d von %d", i, waypoints.size()));
+			LOGGER.logMessage(String.format("Gehe zu Wegpunkt %d von %d", i, waypoints.size()));
 			lootAllPokestopsWithinRadius(50);
 			moveTo(waypoints.get(i));
 			Actions.tradeInDuplicates(go, sc);
@@ -61,7 +64,7 @@ public class RoundtripRunner extends AbstractPgoBotRunner {
 		Actions.tradeInDuplicates(go, sc);
 		Actions.tradeInTrashItems(go, sc);
 
-		this.sc.logMessage(String.format("=== / %s (looting) ===", runnerName));
+		LOGGER.logMessage(String.format("=== / %s (looting) ===", runnerName));
 	}
 	
 	@Override

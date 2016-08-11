@@ -5,6 +5,7 @@ import com.pokegoapi.exceptions.RemoteServerException;
 
 import lol.moep.pgobot.model.GeoCoordinate;
 import lol.moep.pgobot.model.StatsCounter;
+import lol.moep.pgobot.util.PoGoLogger;
 import lol.moep.pgobot.waypoints.MartinWaypoints;
 
 /**
@@ -14,6 +15,8 @@ import lol.moep.pgobot.waypoints.MartinWaypoints;
  *
  */
 public class MockRunner implements PgoBotRunner {
+	
+	private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
 
 	private StatsCounter statistics = new StatsCounter();
 
@@ -24,7 +27,7 @@ public class MockRunner implements PgoBotRunner {
 				Thread.sleep(2000);
 				statistics.addMetersTraveled(10);
 				statistics.addXp(50);
-				statistics.logMessage("Noch eine Zeile.");
+				LOGGER.logMessage("Noch eine Zeile.");
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}

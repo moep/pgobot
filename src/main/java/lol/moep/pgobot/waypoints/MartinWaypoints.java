@@ -89,6 +89,17 @@ public final class MartinWaypoints {
 		return waypoints;
 	}
 
+	public static List<GeoCoordinate> glumandaAction() {
+		final List<GeoCoordinate> waypoints = new ArrayList<GeoCoordinate>();
+		
+		// Mendelson-Bartholdy-Park
+		waypoints.add(new GeoCoordinate(52.503138, 13.373655));
+		// Potsdamer Brücke
+		waypoints.add(new GeoCoordinate(52.505824, 13.368248));
+
+		return waypoints;
+	}
+
 	// Ponitas und Dratinis? beobachten
 	public static List<GeoCoordinate> koellnischerPark() {
 		final List<GeoCoordinate> waypoints = new ArrayList<GeoCoordinate>();
@@ -123,6 +134,40 @@ public final class MartinWaypoints {
 		waypoints.add(new GeoCoordinate(52.498968, 13.449955));
 		waypoints.add(new GeoCoordinate(52.502103, 13.442826));
 		waypoints.add(new GeoCoordinate(52.500745, 13.441158));
+		
+		return waypoints;
+	}
+
+	public static List<GeoCoordinate> spreeTour() {
+		final List<GeoCoordinate> waypoints = new ArrayList<GeoCoordinate>();
+		
+		waypoints.add(new GeoCoordinate(52.515442, 13.407061));
+		waypoints.add(new GeoCoordinate(52.521432, 13.400066));
+		waypoints.add(new GeoCoordinate(52.522359, 13.395721));
+		waypoints.add(new GeoCoordinate(52.522711, 13.391633));
+		waypoints.add(new GeoCoordinate(52.522515, 13.387878));
+		waypoints.add(new GeoCoordinate(52.520550, 13.384734));
+		waypoints.add(new GeoCoordinate(52.519584, 13.381483));
+		waypoints.add(new GeoCoordinate(52.519466, 13.379058));
+		waypoints.add(new GeoCoordinate(52.520386, 13.376934));
+		
+		waypoints.add(new GeoCoordinate(52.522038, 13.376162));
+		waypoints.add(new GeoCoordinate(52.521738, 13.375422));
+		waypoints.add(new GeoCoordinate(52.521751, 13.369060));
+		waypoints.add(new GeoCoordinate(52.522332, 13.368094));
+		waypoints.add(new GeoCoordinate(52.523553, 13.371667));
+		waypoints.add(new GeoCoordinate(52.523546, 13.372869));
+		waypoints.add(new GeoCoordinate(52.523350, 13.374264));
+		waypoints.add(new GeoCoordinate(52.522038, 13.376162));
+		
+		waypoints.add(new GeoCoordinate(52.520386, 13.376934));
+		waypoints.add(new GeoCoordinate(52.519466, 13.379058));
+		waypoints.add(new GeoCoordinate(52.519584, 13.381483));
+		waypoints.add(new GeoCoordinate(52.520550, 13.384734));
+		waypoints.add(new GeoCoordinate(52.522515, 13.387878));
+		waypoints.add(new GeoCoordinate(52.522711, 13.391633));
+		waypoints.add(new GeoCoordinate(52.522359, 13.395721));
+		waypoints.add(new GeoCoordinate(52.521432, 13.400066));
 		
 		return waypoints;
 	}
