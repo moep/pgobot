@@ -24,6 +24,8 @@ import lol.moep.pgobot.model.StatsCounter;
 import lol.moep.pgobot.runners.ExplorerRunner;
 import lol.moep.pgobot.runners.PgoBotRunner;
 import lol.moep.pgobot.runners.RoundtripRunner;
+import lol.moep.pgobot.runners.WaypointRunner;
+import lol.moep.pgobot.util.PoGoLogger;
 import lol.moep.pgobot.waypoints.MartinWaypoints;
 import okhttp3.OkHttpClient;
 
@@ -31,6 +33,8 @@ import okhttp3.OkHttpClient;
  * Created by moep on 26.07.16.
  */
 public class PgoBotMitJetty {
+	
+	private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
 
 	private static final String TOKEN_PROPERTIES_FILE_NAME = "token.properties";
 	
@@ -54,10 +58,9 @@ public class PgoBotMitJetty {
 				StatsCounter statistics = runner.getStatistics();
 				responseText.append("<meterstravelled>" + statistics.getMetersTraveledAsString() + "</meterstravelled>");
 				responseText.append("<xp>" + statistics.getXp() + "xp</xp>");
-				responseText.append("<errors>" + statistics.getErrorCount() + " errors</errors>");
+				responseText.append("<errors>" + LOGGER.getErrorCount() + " errors</errors>");
 				responseText.append("<messages>");
-				List<String> messages = statistics.getMessages();
-				Collections.reverse(messages);
+				List<String> messages = LOGGER.getMessages();
 				if (messages.size() > 35) {
 					messages = messages.subList(0, 35);
 				}
@@ -129,15 +132,15 @@ public class PgoBotMitJetty {
 			final PokemonGo go = new PokemonGo(new GoogleUserCredentialProvider(httpClient, refreshToken), httpClient);
 			
 //		final PgoBotRunner r = new HumboldtHainRunner(go);
-			runner = new ExplorerRunner(go, MartinWaypoints.S_GESUNDBRUNNEN, 3);
+//			runner = new ExplorerRunner(go, MartinWaypoints.S_GESUNDBRUNNEN, 3);
 			// nicht zu lange laufen lassen, nach gut 55 Minuten kam SocketTimeoutException
 //			runner = new RoundtripRunner(go, MartinWaypoints.humboldtHain(), 45);
-//			runner = new WaypointRunner(go, MartinWaypoints.volksparkFriedrichshain());
+			runner = new WaypointRunner(go, MartinWaypoints.spreeTour());
 //			runner = new MockRunner();
 			runner.startTour();
 			
 			runner.getStatistics().print();
-			runner.getStatistics().logMessage("Fertig Meister!");
+			LOGGER.logMessage("Fertig Meister!");
 			
 			// ein wenig warten, damit die Web Anwendung die letzte Aktualisierung mitbekommt
 	        try {

@@ -6,6 +6,7 @@ import java.util.Random;
 
 import com.pokegoapi.api.PokemonGo;
 import com.pokegoapi.api.map.fort.Pokestop;
+import com.pokegoapi.exceptions.AsyncPokemonGoException;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 
@@ -13,11 +14,14 @@ import lol.moep.pgobot.model.GeoCoordinate;
 import lol.moep.pgobot.model.Haversine;
 import lol.moep.pgobot.util.Actions;
 import lol.moep.pgobot.util.MapScanner;
+import lol.moep.pgobot.util.PoGoLogger;
 
 /**
  * @author Hicks
  */
 public class ExplorerRunner extends AbstractPgoBotRunner {
+	
+	private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
 	
 	private static final double RADIUS = 1000;
 	private final Random random;
@@ -47,7 +51,7 @@ public class ExplorerRunner extends AbstractPgoBotRunner {
     		runnerName = runnerName.substring(0, runnerName.lastIndexOf("Runner"));
     	}
     	
-        this.sc.logMessage(String.format("=== %s (looting) ===", runnerName));
+        LOGGER.logMessage(String.format("=== %s (looting) ===", runnerName));
 
         final long startTime = System.currentTimeMillis();
         final long endTime = startTime + (tripTime * 1000 * 60);
@@ -75,7 +79,7 @@ public class ExplorerRunner extends AbstractPgoBotRunner {
         
         Actions.tradeInDuplicates(go, sc);
 
-        this.sc.logMessage(String.format("=== / %s (looting) ===", runnerName));
+        LOGGER.logMessage(String.format("=== / %s (looting) ===", runnerName));
     }
 
     /**
@@ -150,8 +154,8 @@ public class ExplorerRunner extends AbstractPgoBotRunner {
 	private boolean hasLure(final Pokestop pokestop) {
 		try {
 			return pokestop.hasLure();
-		} catch (LoginFailedException | RemoteServerException e) {
-			this.sc.logError(e);
+		} catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
+			LOGGER.logError(e);
 		}
 		
 		return false;
