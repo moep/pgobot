@@ -36,7 +36,7 @@ public class Jumper extends AbstractPgoBotRunner {
 		findAndCatchPokemon();
 		lootAllPokestopsWithinRadius(50);
 
-		Actions.tradeInDuplicates(go, sc);
+		Actions.tradeInDuplicates2(go, sc);
 		Actions.tradeInTrashItems(go, sc);
 
 		LOGGER.logMessage(String.format("=== / %s (looting) ===", runnerName));

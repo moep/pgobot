@@ -2,7 +2,6 @@ package lol.moep.pgobot;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -21,7 +20,7 @@ import com.pokegoapi.auth.GoogleUserCredentialProvider;
 
 import lol.moep.pgobot.model.GeoCoordinate;
 import lol.moep.pgobot.model.StatsCounter;
-import lol.moep.pgobot.runners.ExplorerRunner;
+import lol.moep.pgobot.runners.Jumper;
 import lol.moep.pgobot.runners.PgoBotRunner;
 import lol.moep.pgobot.runners.RoundtripRunner;
 import lol.moep.pgobot.runners.WaypointRunner;
@@ -61,8 +60,8 @@ public class PgoBotMitJetty {
 				responseText.append("<errors>" + LOGGER.getErrorCount() + " errors</errors>");
 				responseText.append("<messages>");
 				List<String> messages = LOGGER.getMessages();
-				if (messages.size() > 35) {
-					messages = messages.subList(0, 35);
+				if (messages.size() > 32) {
+					messages = messages.subList(messages.size() - 32, messages.size());
 				}
 				for (String message: messages) {
 					responseText.append("<message>");
@@ -134,9 +133,10 @@ public class PgoBotMitJetty {
 //		final PgoBotRunner r = new HumboldtHainRunner(go);
 //			runner = new ExplorerRunner(go, MartinWaypoints.S_GESUNDBRUNNEN, 3);
 			// nicht zu lange laufen lassen, nach gut 55 Minuten kam SocketTimeoutException
-//			runner = new RoundtripRunner(go, MartinWaypoints.humboldtHain(), 45);
-			runner = new WaypointRunner(go, MartinWaypoints.spreeTour());
+			runner = new RoundtripRunner(go, MartinWaypoints.glumandaAction(), 25);
+//			runner = new WaypointRunner(go, MartinWaypoints.spreeTour());
 //			runner = new MockRunner();
+//			runner = new Jumper(go, 52.503138, 13.373655);
 			runner.startTour();
 			
 			runner.getStatistics().print();
