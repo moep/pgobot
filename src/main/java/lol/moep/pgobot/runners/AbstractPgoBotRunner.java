@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import POGOProtos.Enums.PokemonIdOuterClass;
 import com.pokegoapi.api.PokemonGo;
 import com.pokegoapi.api.inventory.EggIncubator;
 import com.pokegoapi.api.map.fort.Pokestop;
@@ -212,6 +213,10 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                                 LOGGER.green(msg);
                             }
 
+                            if(p.getPokemonId().equals(PokemonIdOuterClass.PokemonId.PIKACHU)) {
+                                printPikachu();
+                            }
+
                             break;
                         case CATCH_FLEE:
                         case CATCH_ESCAPE:
@@ -270,10 +275,6 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                 }
 
                 this.sc.addXp(xp);
-//
-//                    for (ItemAwardOuterClass.ItemAward ia : lootResult.getItemsAwarded()) {
-//                        this.sc.logMessage("  " + ia.getItemId().name() + "(" + ia.getItemCount() + ")");
-//                    }
 
                 Map<ItemIdOuterClass.ItemId, Long> collect = lootResult.getItemsAwarded().stream()
                         .collect(Collectors.groupingBy(ItemAwardOuterClass.ItemAward::getItemId, Collectors.counting()));
@@ -363,5 +364,25 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     	// nicht direkt über das PokemonGo Objekt um Threading Probleme zu vermeiden
 		return lastKnownPosition;
 	}
+
+	private static void printPikachu() {
+        LOGGER.yellow("\n           ,     ,_\n" +
+                "           |`\\    `;;,            ,;;'\n" +
+                "           |  `\\    \\ '.        .'.'\n" +
+                "           |    `\\   \\  '-\"\"\"\"-' /\n" +
+                "           `.     `\\ /          |`\n" +
+                "             `>    /;   _     _ \\ \n" +
+                "              /   / |       .    ;\n" +
+                "             <  (`\";\\ ()   ~~~  (/_\n" +
+                "              ';;\\  `,     __ _.-'` )\n" +
+                "                >;\\          `   _.'\n" +
+                "                `;;\\          \\-'\n" +
+                "                  ;/           \\ _\n" +
+                "                  |   ,\"\".     .` \\\n" +
+                "                  |      _|   '   /\n" +
+                "                   ;    /\")     .;-,\n" +
+                "                    \\    /  __   .-'\n" +
+                "                     \\,_/-\"`  `-'");
+    }
 
 }
