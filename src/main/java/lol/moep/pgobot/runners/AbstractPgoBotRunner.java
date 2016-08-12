@@ -128,7 +128,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     protected void moveTo(GeoCoordinate targetPosition, int sleepMillisPer10Meters) {
         GeoCoordinate currentPosition = new GeoCoordinate(this.go.getLatitude(), this.go.getLongitude());
         double distance = Haversine.getDistanceInMeters(currentPosition, targetPosition);
-        LOGGER.mangenta("=== Strecke: " + currentPosition + " -> " + targetPosition + " -- " + (int) distance + "m @ 10m / " + sleepMillisPer10Meters + "ms");
+        LOGGER.yellow("=== Strecke: " + currentPosition + " -> " + targetPosition + " -- " + (int) distance + "m @ 10m / " + sleepMillisPer10Meters + "ms");
 
         List<GeoCoordinate> interpolatedCoordinates = getInterpolatedCoordinates(currentPosition, targetPosition);
 

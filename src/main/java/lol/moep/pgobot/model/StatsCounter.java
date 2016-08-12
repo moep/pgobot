@@ -119,7 +119,7 @@ public class StatsCounter {
     }
 
     public void print() {
-    	LOGGER.mangenta("Zurückgelegte Strecke: " + this.getMetersTraveledAsString());
+    	LOGGER.yellow("Zurückgelegte Strecke: " + this.getMetersTraveledAsString());
     	LOGGER.yellow("XP: " + this.getXp());
     	LOGGER.green("Gefangene Pokemon: ");
         printCaughtPokemon();

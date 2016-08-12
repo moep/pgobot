@@ -10,13 +10,15 @@ import lol.moep.pgobot.model.GeoCoordinate;
 import lol.moep.pgobot.util.Actions;
 import lol.moep.pgobot.util.IVAnalyzer;
 import lol.moep.pgobot.util.PoGoLogger;
+import lol.moep.pgobot.util.logger.Logger;
+import lol.moep.pgobot.util.logger.LoggerFactory;
 
 /**
  * @author Hicks
  */
 public class WaypointRunner extends AbstractPgoBotRunner {
 	
-	private static final PoGoLogger LOGGER = PoGoLogger.getInstance();
+	private static final Logger LOGGER = LoggerFactory.getLoggerInstance();
 
 	private final List<GeoCoordinate> waypoints;
 
@@ -33,13 +35,13 @@ public class WaypointRunner extends AbstractPgoBotRunner {
 			runnerName = runnerName.substring(0, runnerName.lastIndexOf("Runner"));
 		}
 
-		LOGGER.logMessage(String.format("=== %s (looting) ===", runnerName));
+		LOGGER.gray(String.format("=== %s (looting) ===", runnerName));
 
 		teleportTo(waypoints.get(0));
 		IVAnalyzer.analyze(go);
 		
 		for (int i = 1; i < waypoints.size(); i++) {
-			LOGGER.logMessage(String.format("Gehe zu Wegpunkt %d von %d", i, waypoints.size()));
+			LOGGER.yellow(String.format("Gehe zu Wegpunkt %d von %d", i, waypoints.size()));
 			lootAllPokestopsWithinRadius(50);
 			walkTo(waypoints.get(i));
 			Actions.tradeInDuplicates2(go, sc);
@@ -51,9 +53,9 @@ public class WaypointRunner extends AbstractPgoBotRunner {
 		lootAllPokestopsWithinRadius(50);
 		Actions.tradeInDuplicates2(go, sc);
 		Actions.tradeInTrashItems(go, sc);
-		IVAnalyzer.analyze(go);
+		Actions.renameToIv(go, sc);
 		
-		LOGGER.logMessage(String.format("=== / %s (looting) ===", runnerName));
+		LOGGER.gray(String.format("=== / %s (looting) ===", runnerName));
 	}
 	
 	@Override
