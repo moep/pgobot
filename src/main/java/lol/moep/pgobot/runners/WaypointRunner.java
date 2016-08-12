@@ -38,7 +38,7 @@ public class WaypointRunner extends AbstractPgoBotRunner {
 		LOGGER.gray(String.format("=== %s (looting) ===", runnerName));
 
 		teleportTo(waypoints.get(0));
-		IVAnalyzer.analyze(go);
+		Actions.renameToIv(go, sc);
 		
 		for (int i = 1; i < waypoints.size(); i++) {
 			LOGGER.yellow(String.format("Gehe zu Wegpunkt %d von %d", i, waypoints.size()));

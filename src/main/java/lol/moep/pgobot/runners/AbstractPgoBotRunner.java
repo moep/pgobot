@@ -202,9 +202,16 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                     this.sc.addCaughtPokemon(p);
                     switch (res.getStatus()) {
                         case CATCH_SUCCESS:
-                        	LOGGER.green("Gefangen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) +
+                            String msg = "Gefangen: " + Dictionary.getNameFromPokemonId(p.getPokemonId()) +
                                     " (IV: " + er.getPokemonData().getIndividualAttack() + "/" + er.getPokemonData().getIndividualDefense() + "/" + er.getPokemonData().getIndividualStamina() +
-                                    " XP: " + xp + " SD: " + listSum(res.getStardustList()) + ")");
+                                    " XP: " + xp + " SD: " + listSum(res.getStardustList()) + ")";
+
+                            if (er.getPokemonData().getIndividualAttack() + er.getPokemonData().getIndividualDefense() + er.getPokemonData().getIndividualStamina() >= 41) {
+                                LOGGER.mangenta(msg);
+                            } else {
+                                LOGGER.green(msg);
+                            }
+
                             break;
                         case CATCH_FLEE:
                         case CATCH_ESCAPE:
@@ -244,6 +251,8 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
 
         int numLooted = 0;
         GeoCoordinate wp = null;
+        String msg;
+
         for (Pokestop ps : sortedPokestops) {
             wp = new GeoCoordinate(ps.getLatitude(), ps.getLongitude());
             if (ps.canLoot(true)) {
@@ -251,8 +260,14 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                 ++numLooted;
                 PokestopLootResult lootResult = ps.loot();
                 xp = lootResult.getExperience();
-                LOGGER.blue("Loote (" + numLooted + "/" + numPokestops + "): " + ps.getDetails().getName()
-                        + " ## " + lootResult.getResult().name() + " ## " + xp + "EXP");
+                msg = "Loote (" + numLooted + "/" + numPokestops + "): " + ps.getDetails().getName()
+                        + " ## " + lootResult.getResult().name() + " ## " + xp + "EXP";
+
+                if(xp >= 100) {
+                    LOGGER.mangenta(msg);
+                } else {
+                    LOGGER.blue(msg);
+                }
 
                 this.sc.addXp(xp);
 //
@@ -264,7 +279,13 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                         .collect(Collectors.groupingBy(ItemAwardOuterClass.ItemAward::getItemId, Collectors.counting()));
 
                 for (ItemIdOuterClass.ItemId id : collect.keySet()) {
-                	LOGGER.blue("  " + id.name() + " (" + collect.get(id) + ")");
+                    msg = "  " + id.name() + " (" + collect.get(id) + ")";
+                    if (xp >= 100) {
+                        LOGGER.mangenta(msg);
+                    } else {
+                        LOGGER.blue(msg);
+                    }
+
                 }
 
             } else {

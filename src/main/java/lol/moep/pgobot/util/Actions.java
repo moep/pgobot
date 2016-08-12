@@ -341,17 +341,16 @@ public class Actions {
                 .filter(p -> p.getNickname() == null || p.getNickname().isEmpty())
                 .forEach(p -> {
                     try {
-                        String[] values = {
-                                String.valueOf(p.getIndividualAttack()),
-                                String.valueOf(p.getIndividualDefense()),
-                                String.valueOf(p.getIndividualStamina())
-                        };
-
                         String ivNickname = MessageFormat.format(NICKNAME_TEMPLATE, p.getIndividualAttack(), p.getIndividualDefense(), p.getIndividualStamina());
-
                         LOGGER.info(Dictionary.getNameFromPokemonId(p.getPokemonId()) + " -> " + ivNickname);
                         p.renamePokemon(ivNickname);
+
                         sleep(1000);
+
+                        if (p.getIndividualAttack() == 15 && p.getIndividualStamina() == 15 && p.getIndividualStamina() == 15) {
+                            p.setFavoritePokemon(true);
+                            sleep(500);
+                        }
                     } catch (LoginFailedException | RemoteServerException | AsyncPokemonGoException e) {
                         LOGGER.logError("Fehler beim Umbenennen: ", e);
                     }
