@@ -279,7 +279,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
                         .collect(Collectors.groupingBy(ItemAwardOuterClass.ItemAward::getItemId, Collectors.counting()));
 
                 for (ItemIdOuterClass.ItemId id : collect.keySet()) {
-                    msg = "  " + id.name() + " (" + collect.get(id) + ")";
+                    msg = "  " + Dictionary.getNameFromItemId(id) + " (" + collect.get(id) + ")";
                     if (xp >= 100) {
                         LOGGER.mangenta(msg);
                     } else {

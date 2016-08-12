@@ -1,14 +1,17 @@
 package lol.moep.pgobot.model;
 
 import POGOProtos.Enums.PokemonIdOuterClass;
+import POGOProtos.Inventory.Item.ItemIdOuterClass;
+
+import static POGOProtos.Inventory.Item.ItemIdOuterClass.ItemId.ITEM_TROY_DISK;
 
 /**
  * Created by karsten.groll on 29.07.2016.
  */
 public class Dictionary {
-    private final static String[] names = initNames();
+    private static final String[] pokemonNames = initPokemonNames();
 
-    private static String[] initNames() {
+    private static String[] initPokemonNames() {
         String[] names = new String[152];
         names[0] = "";
 
@@ -169,7 +172,78 @@ public class Dictionary {
     }
 
     public static String getNameFromPokemonId(PokemonIdOuterClass.PokemonId id) {
-        return names[id.getNumber()];
+        return pokemonNames[id.getNumber()];
+    }
+
+    public static String getNameFromItemId(ItemIdOuterClass.ItemId id) {
+        switch(id.getNumber()) {
+            case 0:
+                return "unbekannt";
+            case 1:
+                return "Pokéball";
+            case 2:
+                return "Superball";
+            case 3:
+                return "Ultraball";
+            case 4:
+                return "Meisterball";
+            case 101:
+                return "Trank";
+            case 102:
+                return "Supertrank";
+            case 103:
+                return "Hypertrank";
+            case 104:
+                return "Top-Trank";
+            case 201:
+                return "Beleber";
+            case 202:
+                // TODO Prüfen, wenn in der App gefunden
+                return "Top-Beleber";
+            case 301:
+                return "Glücksei";
+            case 401:
+                return "Rauch";
+            case 402:
+                // TODO Prüfen, wenn in der App gefunden
+                return "Rauch (würzig)";
+            case 403:
+                // TODO Prüfen, wenn in der App gefunden
+                return "Rauch (cool)";
+            case 404:
+                // TODO Prüfen, wenn in der App gefunden
+                return "Rauch (blumig";
+//            case 501:
+//                return ITEM_TROY_DISK.toString();
+//            case 602:
+//                return ITEM_X_ATTACK;
+//            case 603:
+//                return ITEM_X_DEFENSE;
+//            case 604:
+//                return ITEM_X_MIRACLE;
+            case 701:
+                return "Himmihbeere";
+//            case 702:
+//                return ITEM_BLUK_BERRY;
+//            case 703:
+//                return ITEM_NANAB_BERRY;
+//            case 704:
+//                return ITEM_WEPAR_BERRY;
+//            case 705:
+//                return ITEM_PINAP_BERRY;
+//            case 801:
+//                return ITEM_SPECIAL_CAMERA;
+            case 901:
+                return "Ei-Brutmaschine ∞";
+            case 902:
+                return "Ei-Brutmaschine";
+//            case 1001:
+//                return ITEM_POKEMON_STORAGE_UPGRADE;
+//            case 1002:
+//                return ITEM_ITEM_STORAGE_UPGRADE;
+            default:
+                return id.name();
+        }
     }
 
 }
