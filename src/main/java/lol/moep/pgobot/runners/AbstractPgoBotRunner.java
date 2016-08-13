@@ -56,7 +56,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     private final int moveActionDistance;
 
     protected enum MovementSpeed {
-        WALK(2.0),
+        WALK(2.0d),
         DRIVE(20.0d);
 
         private final double val;

@@ -3,6 +3,8 @@ package lol.moep.pgobot.runners;
 import POGOProtos.Enums.PokemonIdOuterClass;
 import POGOProtos.Inventory.Item.ItemIdOuterClass;
 import com.pokegoapi.api.PokemonGo;
+import com.pokegoapi.api.inventory.ItemBag;
+import com.pokegoapi.api.map.pokemon.CatchablePokemon;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 import lol.moep.pgobot.model.Dictionary;
@@ -162,19 +164,13 @@ public class MonsterHunter extends AbstractPgoBotRunner {
         LOG.red("=== ENDE (keine Pokébälle mehr im Inventar) ===");
     }
 
-    private boolean hasPokeballsLeft() {
-        try {
-            return !this.go.getInventories().getItemBag().getItems().stream()
-                    .filter(i -> i.getItemId().equals(ItemIdOuterClass.ItemId.ITEM_POKE_BALL)
-                            || i.getItemId().equals(ItemIdOuterClass.ItemId.ITEM_GREAT_BALL)
-                            || i.getItemId().equals(ItemIdOuterClass.ItemId.ITEM_ULTRA_BALL)
-                            || i.getItemId().equals(ItemIdOuterClass.ItemId.ITEM_MASTER_BALL))
-                    .collect(Collectors.toList())
-                    .isEmpty();
-        } catch (LoginFailedException | RemoteServerException e) {
-            LOG.logError(e);
-            return false;
-        }
+    private boolean hasPokeballsLeft() throws LoginFailedException, RemoteServerException {
+        ItemBag itemBag = this.go.getInventories().getItemBag();
+
+        return itemBag.getItem(ItemIdOuterClass.ItemId.ITEM_POKE_BALL).getCount() != 0
+                || itemBag.getItem(ItemIdOuterClass.ItemId.ITEM_GREAT_BALL).getCount() != 0
+                || itemBag.getItem(ItemIdOuterClass.ItemId.ITEM_ULTRA_BALL).getCount() != 0
+                || itemBag.getItem(ItemIdOuterClass.ItemId.ITEM_MASTER_BALL).getCount() != 0;
 
     }
 
