@@ -56,7 +56,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     private final int moveActionDistance;
 
     protected enum MovementSpeed {
-        WALK(2.2d),
+        WALK(2.0),
         DRIVE(20.0d);
 
         private final double val;
@@ -114,7 +114,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     }
 
     private long getSleepMillis(MovementSpeed speed) {
-        return Math.round((1000 * speed.getVal()) / this.metersPerMove);
+        return Math.round((this.metersPerMove / speed.getVal()) * 1000);
     }
 
     protected void walkTo(GeoCoordinate targetPosition) throws LoginFailedException, RemoteServerException {
