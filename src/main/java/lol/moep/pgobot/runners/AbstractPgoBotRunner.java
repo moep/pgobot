@@ -46,21 +46,26 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     private boolean isOnMove = false;
 
     /**
-     * Move distance in meters after which the onMove function is triggered. Must be a multiple of 10.
+     * Distance in meters between location updates
+     */
+    private final int metersPerMove;
+
+    /**
+     * Move distance in meters after which the onMove function is triggered. Must be a multiple of metersPerMove.
      */
     private final int moveActionDistance;
 
-    protected enum SpeedWaitTime {
-        WALK(3600),
-        DRIVE(500);
+    protected enum MovementSpeed {
+        WALK(2.2d),
+        DRIVE(20.0d);
 
-        private final int val;
+        private final double val;
 
-        private SpeedWaitTime(int val) {
+        private MovementSpeed(double val) {
             this.val = val;
         }
 
-        public int getVal() {
+        public double getVal() {
             return this.val;
         }
     }
@@ -69,6 +74,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
         this.go = go;
         sc = new StatsCounter();
 
+        this.metersPerMove = 10;
         this.moveActionDistance = 50;
     }
 
@@ -107,29 +113,33 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
     	this.lastKnownPosition = targetPosition;
     }
 
+    private long getSleepMillis(MovementSpeed speed) {
+        return Math.round((1000 * speed.getVal()) / this.metersPerMove);
+    }
+
     protected void walkTo(GeoCoordinate targetPosition) throws LoginFailedException, RemoteServerException {
-        moveTo(targetPosition, SpeedWaitTime.WALK.getVal());
+        moveTo(targetPosition, MovementSpeed.WALK);
     }
 
     protected void driveTo(GeoCoordinate targetPosition) throws LoginFailedException, RemoteServerException {
-        moveTo(targetPosition, SpeedWaitTime.DRIVE.getVal());
+        moveTo(targetPosition, MovementSpeed.DRIVE);
     }
 
     protected void moveTo(GeoCoordinate targetPosition) throws LoginFailedException, RemoteServerException {
-        int sleepMillis;
+        MovementSpeed speed;
         if (isBreeding()) {
-            sleepMillis = SpeedWaitTime.WALK.getVal();
+            speed = MovementSpeed.WALK;
         } else {
-            sleepMillis = SpeedWaitTime.DRIVE.getVal();
+            speed = MovementSpeed.DRIVE;
         }
 
-        moveTo(targetPosition, sleepMillis);
+        moveTo(targetPosition, speed);
     }
 
-    protected void moveTo(GeoCoordinate targetPosition, int sleepMillisPer10Meters) {
+    protected void moveTo(GeoCoordinate targetPosition, MovementSpeed speed) {
         GeoCoordinate currentPosition = new GeoCoordinate(this.go.getLatitude(), this.go.getLongitude());
         double distance = Haversine.getDistanceInMeters(currentPosition, targetPosition);
-        LOGGER.yellow("=== Strecke: " + currentPosition + " -> " + targetPosition + " -- " + (int) distance + "m @ 10m / " + sleepMillisPer10Meters + "ms");
+        LOGGER.yellow("=== Strecke: " + currentPosition + " -> " + targetPosition + " -- " + (int) distance + "m @ " + speed.getVal() + "m/s");
 
         List<GeoCoordinate> interpolatedCoordinates = getInterpolatedCoordinates(currentPosition, targetPosition);
 
@@ -140,7 +150,7 @@ public abstract class AbstractPgoBotRunner implements PgoBotRunner {
             teleportTo(c);
 
             ++coordinatesVisited;
-            Actions.sleep(sleepMillisPer10Meters);
+            Actions.sleep(getSleepMillis(speed));
 
             if (coordinatesVisited % (this.moveActionDistance / 10) == 0) {
 				if (!isOnMove) {

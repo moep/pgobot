@@ -93,7 +93,7 @@ public class ExplorerRunner extends AbstractPgoBotRunner {
 			// stay near lures for fun and profit
 			findAndCatchPokemon();
 			lootAllPokestopsWithinRadius(50);
-			moveTo(new GeoCoordinate(currentPokestop.getLatitude(), currentPokestop.getLongitude()), 3600);
+			moveTo(new GeoCoordinate(currentPokestop.getLatitude(), currentPokestop.getLongitude()), MovementSpeed.DRIVE);
 			Actions.sleep(10000);
 		}
 	}

@@ -383,7 +383,7 @@ public class Actions {
         }
     }
 
-    public static void sleep(int timeMilis) {
+    public static void sleep(long timeMilis) {
         try {
             Thread.sleep(timeMilis);
         } catch (InterruptedException e) {
